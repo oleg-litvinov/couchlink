@@ -1,0 +1,230 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: CouchLink - watch-together sync, AI picks/Q&A and Alexa voice for Fire TV
+
+Parameters:
+  ModelId:
+    Type: String
+    Default: us.amazon.nova-2-lite-v1:0
+    Description: Bedrock model or inference profile id used via the Converse API
+  AiMode:
+    Type: String
+    Default: bedrock
+    AllowedValues: [bedrock, heuristic]
+  GuardrailId:
+    Type: String
+    Default: ""
+    Description: Optional Bedrock Guardrail id (leave empty to disable)
+  AlexaSkillId:
+    Type: String
+    Default: ""
+    Description: Alexa skill id (amzn1.ask.skill...). Leave empty on first deploy, then redeploy with it.
+  StageName:
+    Type: String
+    Default: prod
+
+Conditions:
+  HasSkillId: !Not [!Equals [!Ref AlexaSkillId, ""]]
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    MemorySize: 512
+    Timeout: 30
+    CodeUri: ../backend/src/
+    Tracing: Active
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref Table
+        MODEL_ID: !Ref ModelId
+        AI_MODE: !Ref AiMode
+        GUARDRAIL_ID: !Ref GuardrailId
+        WS_ENDPOINT: !Sub "https://${WsApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+
+Resources:
+  # ------------------------------------------------------------------ state
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: pk, AttributeType: S }
+        - { AttributeName: sk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: pk, KeyType: HASH }
+        - { AttributeName: sk, KeyType: RANGE }
+      TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+
+  # ------------------------------------------------------------------ realtime sync
+  WsApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: couchlink-ws
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.type"
+
+  WsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WsApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WsFunction.Arn}/invocations"
+
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: $connect, Target: !Sub "integrations/${WsIntegration}" }
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: $disconnect, Target: !Sub "integrations/${WsIntegration}" }
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: $default, Target: !Sub "integrations/${WsIntegration}" }
+
+  WsDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn: [ConnectRoute, DisconnectRoute, DefaultRoute]
+    Properties: { ApiId: !Ref WsApi }
+
+  WsStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref WsApi
+      StageName: !Ref StageName
+      DeploymentId: !Ref WsDeployment
+      DefaultRouteSettings: { ThrottlingBurstLimit: 200, ThrottlingRateLimit: 100 }
+
+  WsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ws_handler.handler
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WsApi}/${StageName}/POST/@connections/*"
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:ApplyGuardrail]
+              Resource: "*"
+
+  WsInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WsFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WsApi}/*"
+
+  # ------------------------------------------------------------------ voice
+  AlexaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: alexa_handler.handler
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WsApi}/${StageName}/POST/@connections/*"
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:ApplyGuardrail]
+              Resource: "*"
+
+  AlexaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Condition: HasSkillId
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AlexaFunction
+      Principal: alexa-appkit.amazon.com
+      EventSourceToken: !Ref AlexaSkillId
+
+  # ------------------------------------------------------------------ web app + media CDN
+  WebBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+
+  WebOac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Cdn:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: web
+            DomainName: !GetAtt WebBucket.RegionalDomainName
+            OriginAccessControlId: !Ref WebOac
+            S3OriginConfig: { OriginAccessIdentity: "" }
+        DefaultCacheBehavior:
+          TargetOriginId: web
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          ResponseHeadersPolicyId: 5cc3b908-e619-4b99-88e5-2cf7f45965bd # Managed-CORS-With-Preflight
+        CustomErrorResponses:
+          - { ErrorCode: 403, ResponseCode: 200, ResponsePagePath: /index.html }
+
+  WebBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudfront.amazonaws.com }
+            Action: s3:GetObject
+            Resource: !Sub "${WebBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Cdn}"
+
+  # ------------------------------------------------------------------ observability
+  Dashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: CouchLink
+      DashboardBody: !Sub |
+        {"widgets":[
+          {"type":"metric","width":12,"height":6,"properties":{"title":"Lambda invocations / errors","region":"${AWS::Region}","metrics":[
+            ["AWS/Lambda","Invocations","FunctionName","${WsFunction}"],[".","Errors",".","."],
+            ["AWS/Lambda","Invocations","FunctionName","${AlexaFunction}"],[".","Errors",".","."]]}},
+          {"type":"metric","width":12,"height":6,"properties":{"title":"WebSocket messages","region":"${AWS::Region}","metrics":[
+            ["AWS/ApiGateway","MessageCount","ApiId","${WsApi}","Stage","${StageName}"],[".","ConnectCount",".",".",".","."]]}},
+          {"type":"log","width":24,"height":6,"properties":{"title":"AI latency (ms)","region":"${AWS::Region}",
+            "query":"SOURCE '/aws/lambda/${WsFunction}' | SOURCE '/aws/lambda/${AlexaFunction}' | filter metric like /latency/ | stats avg(value), pct(value, 90) by metric, bin(1h)"}}
+        ]}
+
+Outputs:
+  WebSocketUrl:
+    Description: Put this in the TV app config (COUCHLINK_WS_URL)
+    Value: !Sub "wss://${WsApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+  CdnUrl:
+    Description: Web app + media
+    Value: !Sub "https://${Cdn.DomainName}"
+  WebBucketName:
+    Value: !Ref WebBucket
+  AlexaFunctionArn:
+    Description: Paste into the Alexa skill endpoint
+    Value: !GetAtt AlexaFunction.Arn
+  TableName:
+    Value: !Ref Table

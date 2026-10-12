@@ -1,0 +1,355 @@
+{
+  "_comment": "Editorial source of truth. Run content/scripts/build_catalog.py to resolve media URLs into catalog.json. Taglines must be spoiler-free premises.",
+  "titles": [
+    {
+      "id": "sintel",
+      "archiveId": "Sintel",
+      "title": "Sintel",
+      "year": 2010,
+      "genres": [
+        "Animation",
+        "Fantasy",
+        "Adventure"
+      ],
+      "moods": [
+        "emotional",
+        "epic",
+        "dragon",
+        "short"
+      ],
+      "tagline": "A lone young woman crosses a harsh world searching for the baby dragon she once rescued.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | durian.blender.org",
+      "hero": true,
+      "subtitlesUrl": "https://durian.blender.org/wp-content/content/subtitles/sintel_en.srt"
+    },
+    {
+      "id": "tears-of-steel",
+      "archiveId": "Tears-of-Steel",
+      "title": "Tears of Steel",
+      "year": 2012,
+      "genres": [
+        "Sci-Fi",
+        "Action"
+      ],
+      "moods": [
+        "sci-fi",
+        "robots",
+        "thrilling",
+        "short",
+        "funny"
+      ],
+      "tagline": "In a future Amsterdam, scientists try to save the world from robots by restaging a painful breakup.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | mango.blender.org",
+      "hero": true
+    },
+    {
+      "id": "cosmos-laundromat",
+      "archiveId": "CosmosLaundromatFirstCycle",
+      "title": "Cosmos Laundromat",
+      "year": 2015,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Fantasy"
+      ],
+      "moods": [
+        "surreal",
+        "dark",
+        "funny",
+        "emotional",
+        "short"
+      ],
+      "tagline": "On a desolate island, a fed-up sheep named Franck meets a mysterious salesman offering the gift of a lifetime.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | gooseberry.blender.org",
+      "hero": true
+    },
+    {
+      "id": "big-buck-bunny",
+      "archiveId": "BigBuckBunny_124",
+      "title": "Big Buck Bunny",
+      "year": 2008,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "feel-good",
+        "kids",
+        "light",
+        "short"
+      ],
+      "tagline": "A gentle giant rabbit takes comic revenge on three rodents who bully the forest.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | peach.blender.org"
+    },
+    {
+      "id": "elephants-dream",
+      "archiveId": "ElephantsDream",
+      "title": "Elephants Dream",
+      "year": 2006,
+      "genres": [
+        "Animation",
+        "Sci-Fi"
+      ],
+      "moods": [
+        "surreal",
+        "weird",
+        "dark",
+        "short"
+      ],
+      "tagline": "Two men wander a vast, strange machine, but only one of them believes it is alive.",
+      "license": "CC BY 2.5",
+      "credit": "(c) Blender Foundation | orange.blender.org"
+    },
+    {
+      "id": "spring",
+      "archiveId": "spring_blenderopenmovie",
+      "title": "Spring",
+      "year": 2019,
+      "genres": [
+        "Animation",
+        "Fantasy"
+      ],
+      "moods": [
+        "emotional",
+        "beautiful",
+        "short",
+        "family"
+      ],
+      "tagline": "A shepherd girl and her dog face ancient spirits to keep the cycle of life turning.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | cloud.blender.org/spring"
+    },
+    {
+      "id": "agent-327",
+      "archiveId": "agent327operationbarbershop",
+      "title": "Agent 327: Operation Barbershop",
+      "year": 2017,
+      "genres": [
+        "Animation",
+        "Action",
+        "Comedy"
+      ],
+      "moods": [
+        "spy",
+        "funny",
+        "thrilling",
+        "short"
+      ],
+      "tagline": "Agent 327 goes undercover in a sleepy barbershop that is hiding a dangerous secret.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | agent327.com"
+    },
+    {
+      "id": "caminandes-1",
+      "archiveId": "Caminandes1LlamaDrama",
+      "title": "Caminandes: Llama Drama",
+      "year": 2013,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "kids",
+        "short",
+        "light"
+      ],
+      "tagline": "Koro the llama really wants to cross the road. The road has other ideas.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | caminandes.com"
+    },
+    {
+      "id": "caminandes-2",
+      "archiveId": "Caminandes2GranDillama",
+      "title": "Caminandes: Gran Dillama",
+      "year": 2013,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "kids",
+        "short",
+        "light"
+      ],
+      "tagline": "Koro is convinced the grass is greener on the other side of the fence.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | caminandes.com"
+    },
+    {
+      "id": "caminandes-3",
+      "archiveId": "CaminandesLlamigos",
+      "title": "Caminandes: Llamigos",
+      "year": 2016,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "kids",
+        "short",
+        "light"
+      ],
+      "tagline": "In the Patagonian winter, Koro meets a penguin and the two battle over the last berries.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | caminandes.com"
+    },
+    {
+      "id": "the-general",
+      "archiveId": "The_General_Buster_Keaton",
+      "title": "The General",
+      "year": 1926,
+      "genres": [
+        "Comedy",
+        "Action",
+        "Silent"
+      ],
+      "moods": [
+        "classic",
+        "silent",
+        "funny",
+        "adventure",
+        "thrilling"
+      ],
+      "tagline": "Buster Keaton plays a train engineer who chases down the spies who stole his beloved locomotive.",
+      "license": "Public domain",
+      "credit": "Buster Keaton Productions, 1926 (public domain)"
+    },
+    {
+      "id": "sherlock-jr",
+      "archiveId": "MyMovie_20190318",
+      "title": "Sherlock Jr.",
+      "year": 1924,
+      "genres": [
+        "Comedy",
+        "Silent"
+      ],
+      "moods": [
+        "classic",
+        "silent",
+        "funny",
+        "mystery",
+        "short"
+      ],
+      "tagline": "A projectionist who dreams of being a detective falls asleep and walks right into the movie.",
+      "license": "Public domain",
+      "credit": "Buster Keaton Productions, 1924 (public domain)"
+    },
+    {
+      "id": "his-girl-friday",
+      "archiveId": "his_girl_friday",
+      "title": "His Girl Friday",
+      "year": 1940,
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "moods": [
+        "classic",
+        "funny",
+        "romantic",
+        "romance",
+        "date",
+        "fast-talking"
+      ],
+      "tagline": "A scheming newspaper editor has one day to win back his star reporter, who is also his ex-wife, before she remarries.",
+      "license": "Public domain",
+      "credit": "Columbia Pictures, 1940 (public domain)"
+    },
+    {
+      "id": "night-of-the-living-dead",
+      "archiveId": "night_of_the_living_dead_dvd",
+      "title": "Night of the Living Dead",
+      "year": 1968,
+      "genres": [
+        "Horror"
+      ],
+      "moods": [
+        "scary",
+        "horror",
+        "dark",
+        "classic",
+        "thrilling"
+      ],
+      "tagline": "Strangers barricade themselves inside a farmhouse as the recently dead rise outside.",
+      "license": "Public domain",
+      "credit": "Image Ten, 1968 (public domain)"
+    },
+    {
+      "id": "nosferatu",
+      "archiveId": "Nosferatu_most_complete_version_93_mins.",
+      "title": "Nosferatu",
+      "year": 1922,
+      "genres": [
+        "Horror",
+        "Silent"
+      ],
+      "moods": [
+        "scary",
+        "horror",
+        "classic",
+        "silent",
+        "dark"
+      ],
+      "tagline": "A young estate agent travels to the remote castle of the mysterious Count Orlok.",
+      "license": "Public domain",
+      "credit": "Prana Film, 1922 (public domain)"
+    },
+    {
+      "id": "little-shop-of-horrors",
+      "archiveId": "TheLittleShopOfHorrors1960_765",
+      "title": "The Little Shop of Horrors",
+      "year": 1960,
+      "genres": [
+        "Comedy",
+        "Horror"
+      ],
+      "moods": [
+        "funny",
+        "dark",
+        "weird",
+        "classic",
+        "scary"
+      ],
+      "tagline": "A clumsy flower-shop clerk raises a strange plant with a very particular appetite.",
+      "license": "Public domain",
+      "credit": "The Filmgroup, 1960 (public domain)"
+    },
+    {
+      "id": "a-trip-to-the-moon",
+      "archiveId": "ATripToTheMoon20Fps",
+      "title": "A Trip to the Moon",
+      "year": 1902,
+      "genres": [
+        "Sci-Fi",
+        "Silent"
+      ],
+      "moods": [
+        "classic",
+        "silent",
+        "weird",
+        "short",
+        "sci-fi",
+        "funny"
+      ],
+      "tagline": "A club of astronomers fires itself to the Moon inside a giant cannon shell.",
+      "license": "Public domain",
+      "credit": "Georges Melies, 1902 (public domain)"
+    }
+  ]
+}

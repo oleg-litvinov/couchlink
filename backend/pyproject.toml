@@ -1,0 +1,18 @@
+[project]
+name = "couchlink-backend"
+version = "0.1.0"
+description = "CouchLink session sync, AI and Alexa backend"
+requires-python = ">=3.12"
+# Runtime deps for Lambda: boto3 is provided by the Lambda Python runtime.
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "boto3>=1.35",
+    "aiohttp>=3.10",
+    "pytest>=8.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]

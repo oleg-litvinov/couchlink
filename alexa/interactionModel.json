@@ -1,0 +1,87 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "couch link",
+      "intents": [
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        { "name": "AMAZON.PauseIntent", "samples": [] },
+        { "name": "AMAZON.ResumeIntent", "samples": [] },
+        {
+          "name": "LinkIntent",
+          "slots": [
+            { "name": "code", "type": "AMAZON.NUMBER" },
+            { "name": "name", "type": "AMAZON.FirstName" }
+          ],
+          "samples": [
+            "code {code}",
+            "the code is {code}",
+            "join {code}",
+            "join session {code}",
+            "code {code} I'm {name}",
+            "code {code} I am {name}",
+            "code {code} this is {name}",
+            "code {code} my name is {name}",
+            "join {code} as {name}",
+            "I'm {name} code {code}",
+            "this is {name} code {code}"
+          ]
+        },
+        {
+          "name": "MoodIntent",
+          "slots": [{ "name": "mood", "type": "AMAZON.SearchQuery" }],
+          "samples": [
+            "I want {mood}",
+            "I want to watch {mood}",
+            "I'd like {mood}",
+            "I feel like {mood}",
+            "I'm in the mood for {mood}",
+            "in the mood for {mood}",
+            "find us {mood}",
+            "something {mood}",
+            "let's watch {mood}"
+          ]
+        },
+        {
+          "name": "FindPicksIntent",
+          "slots": [],
+          "samples": ["find picks", "what should we watch", "recommend something", "show picks", "find something for us"]
+        },
+        {
+          "name": "PauseMovieIntent",
+          "slots": [],
+          "samples": ["pause", "pause the movie", "pause it", "hold on", "wait", "stop the movie for a second"]
+        },
+        {
+          "name": "ResumeMovieIntent",
+          "slots": [],
+          "samples": ["resume", "resume the movie", "play", "keep going", "continue", "unpause", "let's continue"]
+        },
+        {
+          "name": "WhoIntent",
+          "slots": [{ "name": "query", "type": "AMAZON.SearchQuery" }],
+          "samples": ["who is {query}", "who's {query}", "who was {query}", "who are {query}"]
+        },
+        {
+          "name": "WhatIntent",
+          "slots": [{ "name": "query", "type": "AMAZON.SearchQuery" }],
+          "samples": ["what is {query}", "what's {query}", "what was {query}", "what are {query}"]
+        },
+        {
+          "name": "WhyIntent",
+          "slots": [{ "name": "query", "type": "AMAZON.SearchQuery" }],
+          "samples": ["why {query}", "why did {query}", "why is {query}"]
+        },
+        {
+          "name": "RecapIntent",
+          "slots": [],
+          "samples": ["what did I miss", "catch me up", "recap", "what just happened", "give me a recap"]
+        }
+      ],
+      "types": []
+    }
+  }
+}

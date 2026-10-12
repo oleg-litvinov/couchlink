@@ -1,0 +1,32 @@
+{
+  "_comment": "Spoiler-safe character sheet. firstSeen/at are seconds. Timestamps are APPROXIMATE: verify by watching before the demo. 'reveals' are appended only after their time.",
+  "mediaId": "sintel",
+  "characters": [
+    {
+      "name": "Sintel",
+      "firstSeen": 15,
+      "description": "A determined young woman with a short sword, travelling alone through the snowy mountains."
+    },
+    {
+      "name": "The Shaman",
+      "firstSeen": 75,
+      "description": "An old hermit who finds Sintel half-frozen and gives her shelter in his hut."
+    },
+    {
+      "name": "Scales",
+      "firstSeen": 150,
+      "description": "A wounded baby dragon Sintel rescued in a city alley and nursed back to health. She named him Scales.",
+      "reveals": [
+        {"at": 270, "text": "A grown dragon swooped down and carried Scales away, which is why Sintel is searching."}
+      ]
+    },
+    {
+      "name": "The adult dragon",
+      "firstSeen": 270,
+      "description": "A huge dragon that took Scales. Sintel is tracking it to its lair in the mountains.",
+      "reveals": [
+        {"at": 750, "text": "Sintel finally confronts it in its lair."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+.DS_Store
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.aws-sam/
+samconfig.toml
+content/.media-cache/
+app/apps/expo-multi-tv/dist/
+app/apps/vega/build/
+app/apps/vega/dist/
+.env
+.env.*

@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-12T04:46:58+00:00",
+  "items": [
+    {
+      "id": "sintel",
+      "title": "Sintel",
+      "year": 2010,
+      "genres": [
+        "Animation",
+        "Fantasy",
+        "Adventure"
+      ],
+      "moods": [
+        "emotional",
+        "epic",
+        "dragon",
+        "short"
+      ],
+      "tagline": "A lone young woman crosses a harsh world searching for the baby dragon she once rescued.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | durian.blender.org",
+      "hero": true,
+      "subtitlesUrl": "https://durian.blender.org/wp-content/content/subtitles/sintel_en.srt",
+      "videoUrl": "https://archive.org/download/Sintel/sintel-2048-stereo.mp4",
+      "posterUrl": "https://archive.org/download/Sintel/Poster.jpg",
+      "durationSec": 888,
+      "source": "https://archive.org/details/Sintel",
+      "sourceVideo": "https://archive.org/download/Sintel/sintel-2048-stereo.mp4",
+      "faststart": false
+    },
+    {
+      "id": "agent-327",
+      "title": "Agent 327: Operation Barbershop",
+      "year": 2017,
+      "genres": [
+        "Animation",
+        "Action",
+        "Comedy"
+      ],
+      "moods": [
+        "spy",
+        "funny",
+        "thrilling",
+        "short"
+      ],
+      "tagline": "Agent 327 goes undercover in a sleepy barbershop that is hiding a dangerous secret.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | agent327.com",
+      "videoUrl": "https://archive.org/download/agent327operationbarbershop/agent327.mp4",
+      "posterUrl": "https://archive.org/download/agent327operationbarbershop/poster.png",
+      "durationSec": 232,
+      "source": "https://archive.org/details/agent327operationbarbershop",
+      "sourceVideo": "https://archive.org/download/agent327operationbarbershop/agent327.mp4",
+      "hero": false,
+      "faststart": false
+    },
+    {
+      "id": "caminandes-1",
+      "title": "Caminandes: Llama Drama",
+      "year": 2013,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "kids",
+        "short",
+        "light"
+      ],
+      "tagline": "Koro the llama really wants to cross the road. The road has other ideas.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | caminandes.com",
+      "videoUrl": "https://archive.org/download/Caminandes1LlamaDrama/01_llama_drama_1080p.mp4",
+      "posterUrl": "https://archive.org/services/img/Caminandes1LlamaDrama",
+      "durationSec": 90,
+      "source": "https://archive.org/details/Caminandes1LlamaDrama",
+      "sourceVideo": "https://archive.org/download/Caminandes1LlamaDrama/01_llama_drama_1080p.mp4",
+      "hero": false,
+      "faststart": false
+    },
+    {
+      "id": "caminandes-2",
+      "title": "Caminandes: Gran Dillama",
+      "year": 2013,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "kids",
+        "short",
+        "light"
+      ],
+      "tagline": "Koro is convinced the grass is greener on the other side of the fence.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | caminandes.com",
+      "videoUrl": "https://archive.org/download/Caminandes2GranDillama/02_gran_dillama_1080p.mp4",
+      "posterUrl": "https://archive.org/services/img/Caminandes2GranDillama",
+      "durationSec": 146,
+      "source": "https://archive.org/details/Caminandes2GranDillama",
+      "sourceVideo": "https://archive.org/download/Caminandes2GranDillama/02_gran_dillama_1080p.mp4",
+      "hero": false,
+      "faststart": false
+    },
+    {
+      "id": "caminandes-3",
+      "title": "Caminandes: Llamigos",
+      "year": 2016,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "kids",
+        "short",
+        "light"
+      ],
+      "tagline": "In the Patagonian winter, Koro meets a penguin and the two battle over the last berries.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | caminandes.com",
+      "videoUrl": "https://archive.org/download/CaminandesLlamigos/Caminandes_%20Llamigos-1080p.mp4",
+      "posterUrl": "https://archive.org/services/img/CaminandesLlamigos",
+      "durationSec": 150,
+      "source": "https://archive.org/details/CaminandesLlamigos",
+      "sourceVideo": "https://archive.org/download/CaminandesLlamigos/Caminandes_%20Llamigos-1080p.mp4",
+      "hero": false,
+      "faststart": true
+    },
+    {
+      "id": "night-of-the-living-dead",
+      "title": "Night of the Living Dead",
+      "year": 1968,
+      "genres": [
+        "Horror"
+      ],
+      "moods": [
+        "scary",
+        "horror",
+        "dark",
+        "classic",
+        "thrilling"
+      ],
+      "tagline": "Strangers barricade themselves inside a farmhouse as the recently dead rise outside.",
+      "license": "Public domain",
+      "credit": "Image Ten, 1968 (public domain)",
+      "videoUrl": "https://archive.org/download/night_of_the_living_dead_dvd/Night.mp4",
+      "posterUrl": "https://archive.org/download/night_of_the_living_dead_dvd/Night.png",
+      "durationSec": 5732,
+      "source": "https://archive.org/details/night_of_the_living_dead_dvd",
+      "sourceVideo": "https://archive.org/download/night_of_the_living_dead_dvd/Night.mp4",
+      "hero": false,
+      "faststart": false
+    }
+  ]
+}
