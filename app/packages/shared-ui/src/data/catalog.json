@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-12T04:46:58+00:00",
+  "updatedAt": "2026-10-12T04:53:54+00:00",
   "items": [
     {
       "id": "sintel",
@@ -22,12 +22,144 @@
       "credit": "(c) Blender Foundation | durian.blender.org",
       "hero": true,
       "subtitlesUrl": "https://durian.blender.org/wp-content/content/subtitles/sintel_en.srt",
-      "videoUrl": "https://archive.org/download/Sintel/sintel-2048-stereo.mp4",
+      "videoUrl": "https://archive.org/download/Sintel/sintel-2048-stereo_512kb.mp4",
       "posterUrl": "https://archive.org/download/Sintel/Poster.jpg",
       "durationSec": 888,
       "source": "https://archive.org/details/Sintel",
-      "sourceVideo": "https://archive.org/download/Sintel/sintel-2048-stereo.mp4",
+      "sourceVideo": "https://archive.org/download/Sintel/sintel-2048-stereo_512kb.mp4",
+      "faststart": true
+    },
+    {
+      "id": "tears-of-steel",
+      "title": "Tears of Steel",
+      "year": 2012,
+      "genres": [
+        "Sci-Fi",
+        "Action"
+      ],
+      "moods": [
+        "sci-fi",
+        "robots",
+        "thrilling",
+        "short",
+        "funny"
+      ],
+      "tagline": "In a future Amsterdam, scientists try to save the world from robots by restaging a painful breakup.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | mango.blender.org",
+      "hero": true,
+      "videoUrl": "https://archive.org/download/Tears-of-Steel/tears_of_steel_1080p.mp4",
+      "posterUrl": "https://archive.org/download/Tears-of-Steel/tos-poster.jpg",
+      "durationSec": 734,
+      "source": "https://archive.org/details/Tears-of-Steel",
+      "sourceVideo": "https://archive.org/download/Tears-of-Steel/tears_of_steel_1080p.mp4",
+      "faststart": true
+    },
+    {
+      "id": "cosmos-laundromat",
+      "title": "Cosmos Laundromat",
+      "year": 2015,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Fantasy"
+      ],
+      "moods": [
+        "surreal",
+        "dark",
+        "funny",
+        "emotional",
+        "short"
+      ],
+      "tagline": "On a desolate island, a fed-up sheep named Franck meets a mysterious salesman offering the gift of a lifetime.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | gooseberry.blender.org",
+      "hero": true,
+      "videoUrl": "https://archive.org/download/CosmosLaundromatFirstCycle/Cosmos%20Laundromat%20-%20First%20Cycle%20%281080p%29.mp4",
+      "posterUrl": "https://archive.org/services/img/CosmosLaundromatFirstCycle",
+      "durationSec": 731,
+      "source": "https://archive.org/details/CosmosLaundromatFirstCycle",
+      "sourceVideo": "https://archive.org/download/CosmosLaundromatFirstCycle/Cosmos%20Laundromat%20-%20First%20Cycle%20%281080p%29.mp4",
+      "sourceSubtitles": "https://archive.org/download/CosmosLaundromatFirstCycle/CosmosLaundromat-FirstCycle1080p.en.srt",
       "faststart": false
+    },
+    {
+      "id": "big-buck-bunny",
+      "title": "Big Buck Bunny",
+      "year": 2008,
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Family"
+      ],
+      "moods": [
+        "funny",
+        "cute",
+        "feel-good",
+        "kids",
+        "light",
+        "short"
+      ],
+      "tagline": "A gentle giant rabbit takes comic revenge on three rodents who bully the forest.",
+      "license": "CC BY 3.0",
+      "credit": "(c) Blender Foundation | peach.blender.org",
+      "videoUrl": "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
+      "posterUrl": "https://archive.org/services/img/BigBuckBunny_124",
+      "durationSec": 596,
+      "source": "https://archive.org/details/BigBuckBunny_124",
+      "sourceVideo": "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
+      "hero": false,
+      "faststart": false
+    },
+    {
+      "id": "elephants-dream",
+      "title": "Elephants Dream",
+      "year": 2006,
+      "genres": [
+        "Animation",
+        "Sci-Fi"
+      ],
+      "moods": [
+        "surreal",
+        "weird",
+        "dark",
+        "short"
+      ],
+      "tagline": "Two men wander a vast, strange machine, but only one of them believes it is alive.",
+      "license": "CC BY 2.5",
+      "credit": "(c) Blender Foundation | orange.blender.org",
+      "videoUrl": "https://archive.org/download/ElephantsDream/ed_hd.mp4",
+      "posterUrl": "https://archive.org/download/ElephantsDream/ED-CM-St-16bit.png",
+      "durationSec": 654,
+      "source": "https://archive.org/details/ElephantsDream",
+      "sourceVideo": "https://archive.org/download/ElephantsDream/ed_hd.mp4",
+      "hero": false,
+      "faststart": true
+    },
+    {
+      "id": "spring",
+      "title": "Spring",
+      "year": 2019,
+      "genres": [
+        "Animation",
+        "Fantasy"
+      ],
+      "moods": [
+        "emotional",
+        "beautiful",
+        "short",
+        "family"
+      ],
+      "tagline": "A shepherd girl and her dog face ancient spirits to keep the cycle of life turning.",
+      "license": "CC BY 4.0",
+      "credit": "(c) Blender Foundation | cloud.blender.org/spring",
+      "videoUrl": "https://archive.org/download/spring_blenderopenmovie/Spring%20-%20Blender%20Open%20Movie%20-%20YouTube.mp4",
+      "posterUrl": "https://archive.org/services/img/spring_blenderopenmovie",
+      "durationSec": 464,
+      "source": "https://archive.org/details/spring_blenderopenmovie",
+      "sourceVideo": "https://archive.org/download/spring_blenderopenmovie/Spring%20-%20Blender%20Open%20Movie%20-%20YouTube.mp4",
+      "hero": false,
+      "faststart": true
     },
     {
       "id": "agent-327",
@@ -53,7 +185,7 @@
       "source": "https://archive.org/details/agent327operationbarbershop",
       "sourceVideo": "https://archive.org/download/agent327operationbarbershop/agent327.mp4",
       "hero": false,
-      "faststart": false
+      "faststart": true
     },
     {
       "id": "caminandes-1",
@@ -134,6 +266,86 @@
       "source": "https://archive.org/details/CaminandesLlamigos",
       "sourceVideo": "https://archive.org/download/CaminandesLlamigos/Caminandes_%20Llamigos-1080p.mp4",
       "hero": false,
+      "faststart": false
+    },
+    {
+      "id": "the-general",
+      "title": "The General",
+      "year": 1926,
+      "genres": [
+        "Comedy",
+        "Action",
+        "Silent"
+      ],
+      "moods": [
+        "classic",
+        "silent",
+        "funny",
+        "adventure",
+        "thrilling"
+      ],
+      "tagline": "Buster Keaton plays a train engineer who chases down the spies who stole his beloved locomotive.",
+      "license": "Public domain",
+      "credit": "Buster Keaton Productions, 1926 (public domain)",
+      "videoUrl": "https://archive.org/download/The_General_Buster_Keaton/The_General_512kb.mp4",
+      "posterUrl": "https://archive.org/download/The_General_Buster_Keaton/General-still.jpg",
+      "durationSec": 4724,
+      "source": "https://archive.org/details/The_General_Buster_Keaton",
+      "sourceVideo": "https://archive.org/download/The_General_Buster_Keaton/The_General_512kb.mp4",
+      "hero": false,
+      "faststart": true
+    },
+    {
+      "id": "sherlock-jr",
+      "title": "Sherlock Jr.",
+      "year": 1924,
+      "genres": [
+        "Comedy",
+        "Silent"
+      ],
+      "moods": [
+        "classic",
+        "silent",
+        "funny",
+        "mystery",
+        "short"
+      ],
+      "tagline": "A projectionist who dreams of being a detective falls asleep and walks right into the movie.",
+      "license": "Public domain",
+      "credit": "Buster Keaton Productions, 1924 (public domain)",
+      "videoUrl": "https://archive.org/download/MyMovie_20190318/My%20Movie.mp4",
+      "posterUrl": "https://archive.org/download/MyMovie_20190318/My%20Movie.png",
+      "durationSec": 2648,
+      "source": "https://archive.org/details/MyMovie_20190318",
+      "sourceVideo": "https://archive.org/download/MyMovie_20190318/My%20Movie.mp4",
+      "hero": false,
+      "faststart": false
+    },
+    {
+      "id": "his-girl-friday",
+      "title": "His Girl Friday",
+      "year": 1940,
+      "genres": [
+        "Comedy",
+        "Romance"
+      ],
+      "moods": [
+        "classic",
+        "funny",
+        "romantic",
+        "romance",
+        "date",
+        "fast-talking"
+      ],
+      "tagline": "A scheming newspaper editor has one day to win back his star reporter, who is also his ex-wife, before she remarries.",
+      "license": "Public domain",
+      "credit": "Columbia Pictures, 1940 (public domain)",
+      "videoUrl": "https://archive.org/download/his_girl_friday/his_girl_friday.mp4",
+      "posterUrl": "https://archive.org/download/his_girl_friday/his_girl_friday.png",
+      "durationSec": 5505,
+      "source": "https://archive.org/details/his_girl_friday",
+      "sourceVideo": "https://archive.org/download/his_girl_friday/his_girl_friday.mp4",
+      "hero": false,
       "faststart": true
     },
     {
@@ -159,7 +371,60 @@
       "source": "https://archive.org/details/night_of_the_living_dead_dvd",
       "sourceVideo": "https://archive.org/download/night_of_the_living_dead_dvd/Night.mp4",
       "hero": false,
-      "faststart": false
+      "faststart": true
+    },
+    {
+      "id": "nosferatu",
+      "title": "Nosferatu",
+      "year": 1922,
+      "genres": [
+        "Horror",
+        "Silent"
+      ],
+      "moods": [
+        "scary",
+        "horror",
+        "classic",
+        "silent",
+        "dark"
+      ],
+      "tagline": "A young estate agent travels to the remote castle of the mysterious Count Orlok.",
+      "license": "Public domain",
+      "credit": "Prana Film, 1922 (public domain)",
+      "videoUrl": "https://archive.org/download/Nosferatu_most_complete_version_93_mins./Nosferatu_1922_Symphony_of_Horror_512kb.mp4",
+      "posterUrl": "https://archive.org/services/img/Nosferatu_most_complete_version_93_mins.",
+      "durationSec": 5602,
+      "source": "https://archive.org/details/Nosferatu_most_complete_version_93_mins.",
+      "sourceVideo": "https://archive.org/download/Nosferatu_most_complete_version_93_mins./Nosferatu_1922_Symphony_of_Horror_512kb.mp4",
+      "hero": false,
+      "faststart": true
+    },
+    {
+      "id": "a-trip-to-the-moon",
+      "title": "A Trip to the Moon",
+      "year": 1902,
+      "genres": [
+        "Sci-Fi",
+        "Silent"
+      ],
+      "moods": [
+        "classic",
+        "silent",
+        "weird",
+        "short",
+        "sci-fi",
+        "funny"
+      ],
+      "tagline": "A club of astronomers fires itself to the Moon inside a giant cannon shell.",
+      "license": "Public domain",
+      "credit": "Georges Melies, 1902 (public domain)",
+      "videoUrl": "https://archive.org/download/ATripToTheMoon20Fps/TripToTheMoon20Fps_512kb.mp4",
+      "posterUrl": "https://archive.org/services/img/ATripToTheMoon20Fps",
+      "durationSec": 678,
+      "source": "https://archive.org/details/ATripToTheMoon20Fps",
+      "sourceVideo": "https://archive.org/download/ATripToTheMoon20Fps/TripToTheMoon20Fps_512kb.mp4",
+      "hero": false,
+      "faststart": true
     }
   ]
 }
