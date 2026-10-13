@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-The TV app in app/ is derived from AmazonAppDev/react-native-multi-tv-app-sample
-(MIT No Attribution, Copyright Amazon.com, Inc. or its affiliates). See app/LICENSE.
-Films are Blender Foundation open movies (CC BY) and public-domain works; see
-content/titles.json for per-title license and credit.
