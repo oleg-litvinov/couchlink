@@ -46,4 +46,16 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Workaround:** Route Alexa through our backend, which pushes to the TV over WebSocket.
 - **Suggestion:** Document the supported path, for example Vega content launcher or media controls intents exposed to skills.
 
+### 6. Bedrock unusable on a new "new AWS experience" project (quota 0)
+- **Task:** First Bedrock Converse call (Nova Lite / Nova 2 Lite) from a new Free-plan project in us-east-2.
+- **Steps:** `aws login`, then `bedrock-runtime converse` with a 5-token prompt.
+- **Expected vs actual:** We expected a reply. Instead we got `ThrottlingException: Too many tokens per day` on the very first call. Service Quotas shows the applied value as **0** for every model's "tokens per day", marked not adjustable.
+- **Additional friction:** Nova 2 Lite is offered only through cross-Region inference profiles, and new-experience projects block cross-Region features.
+- **Severity:** High (blocks the AI half of the AWS Builder story).
+- **Workaround:**
+  - Deterministic offline fallback, with a circuit breaker that skips Bedrock for 10 minutes after a daily-quota error.
+  - Opened an AWS Support case.
+  - Use in-Region Nova Lite v1.
+- **Suggestion:** Seed non-zero default Bedrock quotas for new projects (or explain why they're 0 in the console), and offer an in-Region, on-demand Nova 2 Lite.
+
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->
