@@ -7,6 +7,8 @@ Pass --media-base https://<cloudfront>/media to point mp4/poster URLs at our own
 CDN after scripts/upload_content.py has mirrored them.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import shutil
