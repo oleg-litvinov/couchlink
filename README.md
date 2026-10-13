@@ -8,6 +8,8 @@ Built for the **Fire TV track** (plus the AWS Builder mini challenge) of *Build,
 
 ## Try it in 60 seconds (web build)
 
+**Live:** https://dntnb9xo1pahz.cloudfront.net
+
 1. Open the web app in **two browser tabs** (or on two computers).
 2. Tab 1: choose a profile, then **Start a watch party**. Note the code.
 3. Tab 2: open `...?name=Sam&code=<code>`, or choose **Join a party** and type the code.
@@ -56,11 +58,13 @@ Use Bedrock locally (requires AWS credentials and Bedrock access in your project
 Prerequisites: AWS CLI v2, AWS SAM CLI, and credentials for the target account.
 
 ```bash
+aws login --profile couchlink     # project Region: us-east-2
 make deploy                       # API GW WebSocket, Lambdas, DynamoDB, CloudFront, dashboard
-make outputs                      # copy WebSocketUrl, CdnUrl, WebBucketName, AlexaFunctionArn
+make outputs                      # WebSocketUrl, CdnUrl, WebBucketName, AlexaFunctionArn
 python3 content/scripts/mirror_media.py --bucket <WebBucketName>        # needs ffmpeg
-python3 content/scripts/build_catalog.py --sync --media-base https://<CdnUrl>/media
-make deploy-web WS_URL=<WebSocketUrl> BUCKET=<WebBucketName>
+python3 content/scripts/build_catalog.py --rebase-only --sync --media-base https://<CdnUrl>/media
+make deploy                       # ship the updated catalog + subtitles to Lambda
+make deploy-web                   # export web build, upload, invalidate CloudFront
 ```
 
 Then paste `WebSocketUrl` into `app/packages/shared-ui/src/session/config.ts` (`PROD_WS_URL`) for the TV builds.

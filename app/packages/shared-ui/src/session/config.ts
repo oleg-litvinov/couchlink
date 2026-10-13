@@ -7,7 +7,7 @@ import { Platform } from 'react-native';
  * - Deployed: the `WebSocketUrl` output of `sam deploy` (paste it into PROD_WS_URL)
  * - Web: `?ws=wss://...` overrides both, handy for demos.
  */
-export const PROD_WS_URL = '';
+export const PROD_WS_URL = 'wss://xskpgmfq98.execute-api.us-east-2.amazonaws.com/prod';
 
 const LOCAL_WS_URL =
   Platform.OS === 'android' ? 'ws://10.0.2.2:8787/ws' : 'ws://localhost:8787/ws';

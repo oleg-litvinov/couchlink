@@ -160,17 +160,20 @@ class BedrockAI:
         import boto3
         from botocore.config import Config
 
-        self.model_id = model_id or os.environ.get("MODEL_ID", "us.amazon.nova-2-lite-v1:0")
+        self.model_id = model_id or os.environ.get("MODEL_ID", "amazon.nova-lite-v1:0")
         self.guardrail_id = guardrail_id or os.environ.get("GUARDRAIL_ID") or None
         self.guardrail_version = os.environ.get("GUARDRAIL_VERSION", "DRAFT")
         self._client = boto3.client(
             "bedrock-runtime",
-            config=Config(read_timeout=20, connect_timeout=5, retries={"max_attempts": 3, "mode": "adaptive"}),
+            config=Config(read_timeout=20, connect_timeout=5, retries={"max_attempts": 2, "mode": "standard"}),
         )
         self._fallback = HeuristicAI()
         self._cache: dict[str, object] = {}
+        self._paused_until = 0.0  # circuit breaker for quota exhaustion
 
     def _converse(self, system: str, user: str, max_tokens: int, temperature: float) -> str:
+        if time.time() < self._paused_until:
+            raise RuntimeError("bedrock paused after quota exhaustion")
         kwargs = dict(
             modelId=self.model_id,
             system=[{"text": system}],
@@ -183,7 +186,13 @@ class BedrockAI:
                 "guardrailVersion": self.guardrail_version,
             }
         t0 = time.time()
-        resp = self._client.converse(**kwargs)
+        try:
+            resp = self._client.converse(**kwargs)
+        except self._client.exceptions.ThrottlingException as e:
+            if "per day" in str(e):
+                # Daily quota gone: retrying is pointless; use the fallback for a while.
+                self._paused_until = time.time() + 600
+            raise
         log.info(json.dumps({"metric": "bedrock_latency_ms", "value": int((time.time() - t0) * 1000), "model": self.model_id}))
         if resp.get("stopReason") == "guardrail_intervened":
             raise RuntimeError("guardrail intervened")

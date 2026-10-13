@@ -5,8 +5,8 @@ Description: CouchLink - watch-together sync, AI picks/Q&A and Alexa voice for F
 Parameters:
   ModelId:
     Type: String
-    Default: us.amazon.nova-2-lite-v1:0
-    Description: Bedrock model or inference profile id used via the Converse API
+    Default: amazon.nova-lite-v1:0
+    Description: Bedrock model id used via the Converse API (in-Region; projects block cross-Region inference)
   AiMode:
     Type: String
     Default: bedrock
@@ -223,6 +223,8 @@ Outputs:
     Value: !Sub "https://${Cdn.DomainName}"
   WebBucketName:
     Value: !Ref WebBucket
+  DistributionId:
+    Value: !Ref Cdn
   AlexaFunctionArn:
     Description: Paste into the Alexa skill endpoint
     Value: !GetAtt AlexaFunction.Arn

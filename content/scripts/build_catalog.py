@@ -97,7 +97,25 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sync", action="store_true")
     ap.add_argument("--media-base", default="")
+    ap.add_argument("--rebase-only", action="store_true", help="rewrite media URLs in the existing catalog without calling archive.org")
     a = ap.parse_args()
+
+    if a.rebase_only:
+        if not a.media_base:
+            raise SystemExit("--rebase-only needs --media-base")
+        cat = json.loads((CONTENT / "catalog.json").read_text())
+        for item in cat["items"]:
+            item["videoUrl"] = f"{a.media_base}/{item['id']}.mp4"
+            item["posterUrl"] = f"{a.media_base}/{item['id']}.jpg"
+            item["faststart"] = True
+        cat["updatedAt"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        (CONTENT / "catalog.json").write_text(json.dumps(cat, indent=2) + "\n")
+        print(f"rebased {len(cat['items'])} titles onto {a.media_base}")
+        if a.sync:
+            for target in TARGETS:
+                shutil.copy(CONTENT / "catalog.json", target)
+                print(f"synced -> {target.relative_to(ROOT)}")
+        return
 
     titles = json.loads((CONTENT / "titles.json").read_text())["titles"]
     previous = {}
