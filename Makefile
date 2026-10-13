@@ -1,5 +1,7 @@
 STACK ?= couchlink
-REGION ?= us-east-1
+REGION ?= us-east-2
+PROFILE ?= couchlink
+export AWS_PROFILE := $(PROFILE)
 
 .PHONY: test server web catalog deploy deploy-web outputs
 

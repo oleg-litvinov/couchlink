@@ -49,7 +49,7 @@ uv run python scripts/alexa_sim.py --user sam mood "something with a dragon, no 
 uv run python scripts/alexa_sim.py --user sam who "that"
 ```
 
-Use Bedrock locally (requires AWS credentials and Bedrock access in `us-east-1`): `make server-bedrock`.
+Use Bedrock locally (requires AWS credentials and Bedrock access in your project Region (`us-east-2`)): `make server-bedrock`.
 
 ## Deploy to AWS
 
