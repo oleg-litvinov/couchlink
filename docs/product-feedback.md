@@ -4,12 +4,12 @@ For each tool: what we used it for · what worked well · what needs work · onb
 
 | Tool / SDK | Used for | Worked well | Needs work | Onboarding | Again? |
 |---|---|---|---|---|---|
-| react-native-multi-tv-app-sample | App scaffold: player, spatial navigation, drawer | One codebase for web, Fire OS and Vega; spatial navigation works on web too | Node 25/corepack setup, stale Expo deps, 10-second sample clips | ~30 min | Yes: fastest way to a TV-grade UI |
+| react-native-multi-tv-app-sample | App scaffold: player, spatial navigation, drawer | One codebase for web, Fire OS and Vega; spatial navigation works on web too | Node 25/corepack setup, stale Expo deps, 10-second sample clips; web player doesn't handle autoplay rejection | ~30 min | Yes: fastest way to a TV-grade UI |
 | Vega SDK / Vega Virtual Device | Vega OS build | TODO | TODO | TODO | TODO |
 | react-tv-space-navigation | D-pad focus | Declarative focus and DefaultFocus | Wrapped rows need a grid primitive | Easy | Yes |
 | Alexa Skills Kit | Voice remote | TODO | TODO | TODO | TODO |
-| Amazon Bedrock (Converse, Nova 2 Lite) | Joint picks, Q&A | TODO | TODO | TODO | TODO |
-| API Gateway WebSocket + Lambda | Real-time sync | TODO | TODO | TODO | TODO |
-| DynamoDB | Session state with TTL | TODO | TODO | TODO | TODO |
-| AWS SAM | Infrastructure as code | TODO | TODO | TODO | TODO |
+| Amazon Bedrock (Converse, Nova Lite) | Joint picks, Q&A | Converse API makes the model a one-line env-var swap; Guardrails plug into the same call | New Free-plan project got a daily token quota of 0 (not adjustable), so the first call fails with ThrottlingException; Nova 2 Lite only via cross-Region inference profiles, which new-experience projects block | Blocked: no successful call yet (support case open) [[team: update when resolved]] | [[team]] |
+| API Gateway WebSocket + Lambda | Real-time sync | Plain JSON over a socket, so the TV needs no SDK; scales to zero; measured ~125 ms median fan-out to the other client from us-east-2 | `$default` route plus `post_to_connection` per member means a broadcast is N API calls; no built-in rooms/fan-out primitive; `GoneException` handling is up to you | [[team]] | Yes: cheapest way to run a stateful real-time feature serverlessly |
+| DynamoDB | Session state with TTL | Single-table design (session, connections, prefs, votes under one partition key) with a 24 h TTL for privacy by default | TTL deletion is lazy (up to ~48 h), so it can't be the only privacy guarantee | [[team]] | Yes |
+| AWS SAM | Infrastructure as code | One template covers WebSocket API, Lambdas, table, CloudFront and dashboard; `sam deploy --resolve-s3` removes bucket setup | WebSocket APIs need raw `AWS::ApiGatewayV2::*` resources (routes, integration, deployment, stage) instead of a SAM shorthand like the HTTP API event | [[team]] | Yes |
 | Kiro | Specs and dev workflow (AWS Builder) | TODO | TODO | TODO | TODO |

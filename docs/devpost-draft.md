@@ -24,12 +24,12 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 5. **Ask mid-show.** "Alexa, who is that?" or the on-screen Ask button pauses every TV and shows the same answer card. Answers are spoiler-safe by construction.
 
 ## How we built it
-[[architecture diagram image with Well-Architected pillar labels]]
+![CouchLink architecture](docs/architecture.svg) [[Export to PNG for the Devpost upload.]]
 
 - **TV app:** React Native on Amazon's multi-TV sample. One codebase covers Vega OS (W3C media player), Fire OS and the web, with spatial navigation for the D-pad.
 - **Real-time sync:** API Gateway WebSocket, Lambda (Python) and DynamoDB.
   - The server holds the playback state, and each TV estimates the server clock with NTP-style pings.
-  - Each TV re-seeks only when it drifts more than 1 s.
+  - Each TV closes small gaps by nudging playback speed ±5% (imperceptible, no re-buffering) and only re-seeks when it drifts more than 1 s.
 - **AI:** the Amazon Bedrock Converse API with Nova 2 Lite, plus Guardrails. Each AI path has a safety mechanism:
   - Picks are validated against catalog IDs.
   - Q&A context is cut off at the current timestamp.
@@ -54,7 +54,8 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 - The sync engine pauses drift correction while the player is buffering.
 
 ## Accomplishments
-- Median sync drift of [[X]] ms (p90 [[Y]] ms), measured on two devices.
+- Median TV-to-TV drift of **35 ms** (p90 63 ms) between two web clients on the live site (11 ms median locally), down from a steady ~395 ms before we added speed nudging. [[Re-measure on Fire TV / Vega Virtual Device + web.]]
+- On the live AWS backend (us-east-2): two clients agree on the server clock to within **1–4 ms**, and a pause reaches the other TV in **~125 ms median** (p90 ~200 ms) over 210 commands (`backend/scripts/sync_bench.py`).
 - [[N]] seconds from app open to watching together.
 - [[N]] real test sessions, with [[quotes]].
 - End-to-end voice flow: link, mood, pause, ask, resume.
@@ -67,7 +68,10 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 - **Privacy:** we store only display names, moods and votes, with a 24-hour TTL. Nothing is used for training.
 
 ## What we learned
-[[3 bullets]]
+- **Nudge, don't seek.** Seeking only when drift passes 1 s left two TVs a steady ~400 ms apart. Changing playback speed by ±5% until they meet brought that to 35 ms with no re-buffering and nothing the viewer notices.
+- **Measure the real thing.** A two-client benchmark against the live backend showed the clocks agree to within a few ms, so the remaining drift was in the player, not the network. That told us where to spend the time.
+- **Browsers block autoplay for a TV that joined from a link.** The second screen silently never started. It now keeps retrying and asks for one key press, which we only found by testing two real tabs end to end.
+- [[team: one lesson from Vega / Alexa / user testing]]
 
 ## What's next
 - Emoji reactions.
@@ -79,7 +83,7 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 
 | Criterion | Evidence |
 |---|---|
-| Tech Implementation | Server-authoritative sync with clock offset ([[X]] ms median drift); one core for TV, Alexa and web; the Vega W3C media player; Bedrock with validation and fallback |
+| Tech Implementation | Server-authoritative sync with clock offset (35 ms median TV-to-TV drift on the live site, 1–4 ms clock agreement); one core for TV, Alexa and web; the Vega W3C media player; Bedrock with validation and fallback |
 | Design | 10-foot UI, D-pad-first voting, "who did what" banners, synced countdown, under 60 s to start |
 | Potential Impact | Long-distance families and couples; no co-watching exists on Fire OS or Vega today; a path to an Appstore SDK or platform API |
 | Quality of Idea | Alexa as a shared remote across two homes; joint recommendations from two people's moods; spoiler-safe Q&A |

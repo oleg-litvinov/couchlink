@@ -19,6 +19,17 @@ export function Countdown({ seconds, title }: { seconds: number; title?: string 
   );
 }
 
+/** Web only: the browser blocked autoplay until the viewer interacts with the page. */
+export function TapToJoin({ title }: { title?: string }) {
+  return (
+    <View style={styles.center} pointerEvents="none">
+      <Text style={ui.caption}>YOUR PARTY IS WATCHING</Text>
+      {title ? <Text style={[ui.h2, { marginTop: scaledPixels(10) }]}>{title}</Text> : null}
+      <Text style={[ui.h3, { marginTop: scaledPixels(24), color: brand.accent }]}>Press OK or click to join in</Text>
+    </View>
+  );
+}
+
 /** Answer to a mid-show question, shown on every TV while playback is paused. */
 export function AnswerCard({ card, onResume, onDismiss }: { card: Card; onResume: () => void; onDismiss: () => void }) {
   return (

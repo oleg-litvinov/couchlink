@@ -5,8 +5,9 @@ export AWS_PROFILE := $(PROFILE)
 
 .PHONY: test server server-bedrock web catalog deploy deploy-web outputs
 
-test:            ## Backend unit tests
+test:            ## Backend + app sync unit tests
 	cd backend && uv run pytest -q
+	cd app/apps/expo-multi-tv && ./node_modules/.bin/jest --roots "<rootDir>/../../packages/shared-ui/src/session"
 
 server:          ## Local session server on ws://localhost:8787/ws (heuristic AI)
 	cd backend && uv run python local_server.py

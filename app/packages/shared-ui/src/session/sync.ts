@@ -6,6 +6,9 @@ export const PLAYING_DRIFT_THRESHOLD = 1.0;
 export const PAUSED_DRIFT_THRESHOLD = 0.3;
 /** After a seek, give the player time to buffer before judging drift again. */
 export const SEEK_COOLDOWN_MS = 2500;
+/** Below the seek threshold, nudge playback speed to close small gaps smoothly. */
+export const NUDGE_DEADBAND = 0.08;
+export const NUDGE_RATE = 0.05;
 
 /** Where everyone should be right now. Negative = countdown before start. */
 export function expectedPosition(state: PlaybackState, serverNow: number): number {
@@ -18,6 +21,7 @@ export interface SyncDecision {
   seekTo: number | null;
   countdown: number | null; // whole seconds left before a synchronized start
   drift: number; // local - expected (seconds)
+  rate: number; // playback speed to apply (1 = normal)
 }
 
 export function decide(
@@ -33,17 +37,21 @@ export function decide(
       seekTo: localTime > 0.5 ? 0 : null,
       countdown: Math.ceil(-expected),
       drift: 0,
+      rate: 1,
     };
   }
   const drift = localTime - expected;
   const threshold = state.playing ? PLAYING_DRIFT_THRESHOLD : PAUSED_DRIFT_THRESHOLD;
   const canSeek = !opts.buffering && opts.msSinceLastSeek > SEEK_COOLDOWN_MS;
+  const seekTo = canSeek && Math.abs(drift) > threshold ? expected + (state.playing ? 0.3 : 0) : null;
+  // Ahead: slow down a little; behind: speed up a little. Imperceptible, no re-buffering.
+  const nudge = state.playing && seekTo === null && Math.abs(drift) > NUDGE_DEADBAND && Math.abs(drift) <= threshold;
   return {
     paused: !state.playing,
-    // Aim slightly ahead while playing to cover the seek/buffer latency.
-    seekTo: canSeek && Math.abs(drift) > threshold ? expected + (state.playing ? 0.3 : 0) : null,
+    seekTo,
     countdown: null,
     drift,
+    rate: nudge ? 1 - Math.sign(drift) * NUDGE_RATE : 1,
   };
 }
 

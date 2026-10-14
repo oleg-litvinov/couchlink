@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 760" font-family="Inter, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6472"/>
+    </marker>
+    <style>
+      .box{fill:#fff;stroke:#c9d1dc;stroke-width:1.5}
+      .aws{fill:#fff7ec;stroke:#f2a33a;stroke-width:1.5}
+      .ai{fill:#f1f0ff;stroke:#7b6cf6;stroke-width:1.5}
+      .t{font-size:17px;font-weight:700;fill:#1b2330}
+      .s{font-size:13px;fill:#4a5363}
+      .h{font-size:13px;font-weight:700;letter-spacing:1.5px;fill:#8a93a3}
+      .ln{stroke:#5b6472;stroke-width:1.6;fill:none;marker-end:url(#a)}
+      .dl{stroke:#5b6472;stroke-width:1.4;fill:none;stroke-dasharray:5 4;marker-end:url(#a)}
+      .lb{font-size:12px;fill:#5b6472}
+      .pill{font-size:11.5px;font-weight:700;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1280" height="760" fill="#f7f9fc"/>
+  <text x="40" y="48" font-size="26" font-weight="800" fill="#1b2330">CouchLink architecture</text>
+  <text x="40" y="74" class="s">Watch together across homes on Fire TV. One Python core serves every input: D-pad, on-screen Ask, and Alexa.</text>
+
+  <!-- column headers -->
+  <text x="40" y="120" class="h">CLIENTS (EACH HOME)</text>
+  <text x="400" y="120" class="h">EDGE + API</text>
+  <text x="700" y="120" class="h">COMPUTE (us-east-2)</text>
+  <text x="1000" y="120" class="h">DATA + AI</text>
+
+  <!-- clients -->
+  <rect class="box" x="40" y="140" width="290" height="70" rx="10"/>
+  <text x="58" y="170" class="t">Fire TV A · Vega OS app</text>
+  <text x="58" y="192" class="s">React Native, W3C media player, D-pad</text>
+  <rect class="box" x="40" y="225" width="290" height="70" rx="10"/>
+  <text x="58" y="255" class="t">Fire TV B · Fire OS app</text>
+  <text x="58" y="277" class="s">Same RN codebase (Android TV)</text>
+  <rect class="box" x="40" y="310" width="290" height="70" rx="10"/>
+  <text x="58" y="340" class="t">Web build (judges)</text>
+  <text x="58" y="362" class="s">Try it in 60 s from two browser tabs</text>
+  <rect class="box" x="40" y="440" width="290" height="70" rx="10"/>
+  <text x="58" y="470" class="t">Echo / Alexa app</text>
+  <text x="58" y="492" class="s">"Alexa, ask CouchLink who is that?"</text>
+
+  <!-- edge -->
+  <rect class="aws" x="400" y="140" width="250" height="70" rx="10"/>
+  <text x="418" y="170" class="t">Amazon CloudFront</text>
+  <text x="418" y="192" class="s">Web app + 720p faststart MP4s (S3)</text>
+  <rect class="aws" x="400" y="260" width="250" height="80" rx="10"/>
+  <text x="418" y="290" class="t">API Gateway WebSocket</text>
+  <text x="418" y="312" class="s">Plain JSON, no SDK on the TV</text>
+  <text x="418" y="330" class="s">Throttled 100 rps / 200 burst</text>
+  <rect class="aws" x="400" y="440" width="250" height="70" rx="10"/>
+  <text x="418" y="470" class="t">Alexa Skills Kit</text>
+  <text x="418" y="492" class="s">Custom skill, intents → Lambda</text>
+
+  <!-- compute -->
+  <rect class="aws" x="700" y="250" width="250" height="100" rx="10"/>
+  <text x="718" y="280" class="t">Lambda · WebSocket</text>
+  <text x="718" y="302" class="s">Python 3.12, arm64</text>
+  <text x="718" y="322" class="s">Sync, picks, votes, Ask</text>
+  <rect class="aws" x="700" y="430" width="250" height="90" rx="10"/>
+  <text x="718" y="460" class="t">Lambda · Alexa</text>
+  <text x="718" y="482" class="s">Same couchlink core</text>
+  <text x="718" y="502" class="s">Pushes to TVs via WebSocket</text>
+  <rect x="700" y="370" width="250" height="40" rx="8" fill="#1b2330"/>
+  <text x="825" y="395" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">shared core.py: one code path</text>
+
+  <!-- data + ai -->
+  <rect class="aws" x="1000" y="160" width="240" height="110" rx="10"/>
+  <text x="1018" y="190" class="t">Amazon DynamoDB</text>
+  <text x="1018" y="212" class="s">Single table: session, members,</text>
+  <text x="1018" y="230" class="s">moods, votes. SSE, 24 h TTL</text>
+  <text x="1018" y="252" class="s">State: {mediaId, playing, pos, t}</text>
+  <rect class="ai" x="1000" y="320" width="240" height="140" rx="10"/>
+  <text x="1018" y="350" class="t">Amazon Bedrock</text>
+  <text x="1018" y="372" class="s">Converse API (Nova Lite)</text>
+  <text x="1018" y="392" class="s">+ Guardrails</text>
+  <text x="1018" y="416" class="s">Picks: catalog IDs validated</text>
+  <text x="1018" y="436" class="s">Ask: context cut at "now"</text>
+  <rect class="box" x="1000" y="490" width="240" height="70" rx="10"/>
+  <text x="1018" y="520" class="t">Offline fallback</text>
+  <text x="1018" y="542" class="s">Circuit breaker on throttling</text>
+
+  <!-- arrows: clients -> edge -->
+  <path class="dl" d="M330 175 H396"/>
+  <text x="340" y="166" class="lb">video</text>
+  <path class="ln" d="M330 260 C365 260 365 290 396 290"/>
+  <path class="ln" d="M330 345 C365 345 365 310 396 310"/>
+  <path class="ln" d="M330 190 C370 200 370 280 396 285"/>
+  <text x="340" y="232" class="lb">wss</text>
+  <path class="ln" d="M330 475 H396"/>
+  <!-- edge -> compute -->
+  <path class="ln" d="M650 300 H696"/>
+  <path class="ln" d="M650 475 H696"/>
+  <!-- compute -> data -->
+  <path class="ln" d="M950 280 C975 280 975 215 996 215"/>
+  <path class="ln" d="M950 320 C975 320 975 390 996 390"/>
+  <path class="ln" d="M950 460 C980 460 980 230 996 230"/>
+  <path class="ln" d="M950 490 C985 490 985 420 996 420"/>
+  <path class="dl" d="M1120 460 V486"/>
+  <!-- alexa lambda pushes to TVs -->
+  <path class="dl" d="M760 430 C760 410 700 360 652 330"/>
+  <text x="658" y="368" class="lb">broadcast</text>
+
+  <!-- ops band -->
+  <rect class="box" x="400" y="580" width="840" height="56" rx="10"/>
+  <text x="418" y="605" class="t">Ops</text>
+  <text x="470" y="605" class="s">AWS SAM (one template) · CloudWatch dashboard (invocations, errors, WS messages, AI latency) · X-Ray tracing</text>
+  <text x="470" y="625" class="s">Measured: 1–4 ms clock agreement between TVs · ~125 ms median command fan-out · 11 ms median TV-to-TV drift</text>
+
+  <!-- Well-Architected pillars -->
+  <text x="40" y="676" class="h">WELL-ARCHITECTED</text>
+  <g>
+    <rect x="40" y="690" width="190" height="50" rx="8" fill="#2f6fde"/>
+    <text x="52" y="710" class="pill">Operational Excellence</text>
+    <text x="52" y="728" class="pill" font-weight="400">IaC, dashboard, tracing</text>
+    <rect x="240" y="690" width="190" height="50" rx="8" fill="#c0392b"/>
+    <text x="252" y="710" class="pill">Security</text>
+    <text x="252" y="728" class="pill" font-weight="400">Scoped IAM, SSE, 24 h TTL</text>
+    <rect x="440" y="690" width="200" height="50" rx="8" fill="#1e8e5a"/>
+    <text x="452" y="710" class="pill">Reliability</text>
+    <text x="452" y="728" class="pill" font-weight="400">Reconnect, AI fallback</text>
+    <rect x="650" y="690" width="200" height="50" rx="8" fill="#8e44ad"/>
+    <text x="662" y="710" class="pill">Performance Efficiency</text>
+    <text x="662" y="728" class="pill" font-weight="400">CDN media, speed nudging</text>
+    <rect x="860" y="690" width="190" height="50" rx="8" fill="#d68910"/>
+    <text x="872" y="710" class="pill">Cost Optimization</text>
+    <text x="872" y="728" class="pill" font-weight="400">On-demand, scale to zero</text>
+    <rect x="1060" y="690" width="180" height="50" rx="8" fill="#117a65"/>
+    <text x="1072" y="710" class="pill">Sustainability</text>
+    <text x="1072" y="728" class="pill" font-weight="400">Graviton arm64, idle = 0</text>
+  </g>
+</svg>

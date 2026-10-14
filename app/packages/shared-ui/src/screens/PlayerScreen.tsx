@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -14,7 +14,7 @@ import { useSession } from '../session/SessionContext';
 import { useSyncedPlayback } from '../session/useSyncedPlayback';
 import { getTitle } from '../data/catalog';
 import Toasts from '../components/couch/Toasts';
-import { AnswerCard, AskPanel, Countdown, SyncBadge, Thinking } from '../components/couch/PlayerChrome';
+import { AnswerCard, AskPanel, Countdown, SyncBadge, TapToJoin, Thinking } from '../components/couch/PlayerChrome';
 
 const SHOW_NATIVE_CONTROLS = false;
 
@@ -35,6 +35,7 @@ export default function PlayerScreen() {
   const [askOpen, setAskOpen] = useState(false);
   const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
+  const [rate, setRate] = useState(1);
   const videoRef = useRef<VideoRef>(null);
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentTimeRef = useRef<number>(0);
@@ -50,8 +51,30 @@ export default function PlayerScreen() {
       setCurrentTime(t);
     },
     isBuffering: () => bufferingRef.current,
+    setRate,
   });
   const paused = sync.inSession ? sync.paused : soloPaused;
+  const shouldPlay = sync.inSession && !paused && sync.countdown === null;
+
+  // Browsers refuse play() until the viewer has interacted with the page (e.g. a TV
+  // that joined from a link). Keep retrying, and ask for one key press meanwhile.
+  const [needsTap, setNeedsTap] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !shouldPlay) {
+      setNeedsTap(false);
+      return;
+    }
+    const id = setInterval(() => {
+      const v = document.querySelector('video');
+      if (!v || !v.paused) return;
+      v.play().then(
+        () => setNeedsTap(false),
+        () => setNeedsTap(true),
+      );
+    }, 1000);
+    return () => clearInterval(id);
+  }, [shouldPlay]);
+
   const overlayOpen = askOpen || !!session.card || session.thinking?.what === 'ask';
 
   const showControls = useCallback(() => {
@@ -130,6 +153,7 @@ export default function PlayerScreen() {
           movie={movie}
           headerImage={headerImage}
           paused={paused || sync.countdown !== null}
+          rate={rate}
           controls={SHOW_NATIVE_CONTROLS}
           onBuffer={(b) => {
             bufferingRef.current = b;
@@ -145,6 +169,7 @@ export default function PlayerScreen() {
 
         {sync.inSession && <SyncBadge drift={sync.drift} members={session.members} />}
         {sync.countdown !== null && <Countdown seconds={sync.countdown} title={title?.title} />}
+        {needsTap && <TapToJoin title={title?.title} />}
 
         {!overlayOpen && !!durationRef.current && (
           <VideoOverlay

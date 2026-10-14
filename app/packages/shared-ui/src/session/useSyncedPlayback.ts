@@ -8,6 +8,8 @@ interface PlayerAdapter {
   getTime: () => number;
   seekTo: (seconds: number) => void;
   isBuffering: () => boolean;
+  /** Optional: players that support it close small gaps by changing speed. */
+  setRate?: (rate: number) => void;
 }
 
 const driftLog: number[] = [];
@@ -54,6 +56,7 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
     } else if (!st.playing) {
       setDrift(null);
     }
+    a.setRate?.(d.rate);
     if (d.seekTo !== null) {
       a.seekTo(d.seekTo);
       lastSeekAt.current = Date.now();

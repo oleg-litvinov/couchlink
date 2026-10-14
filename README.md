@@ -27,7 +27,7 @@ Keyboard: arrows = D-pad, Enter = OK, Backspace = Back.
                                                                      └─ S3 + CloudFront (web app, 720p faststart media)
 ```
 
-- **Server-authoritative sync.** State is `{mediaId, playing, position, updatedAt}`. Each TV estimates the server clock with NTP-style pings, so every TV computes the same expected position. A TV only re-seeks when it drifts more than 1 s, and last write wins. A synchronized start sets `updatedAt` slightly in the future, so every TV shows the same countdown.
+- **Server-authoritative sync.** State is `{mediaId, playing, position, updatedAt}`. Each TV estimates the server clock with NTP-style pings, so every TV computes the same expected position. A TV closes gaps under 1 s by nudging playback speed ±5% and only re-seeks beyond that; last write wins. A synchronized start sets `updatedAt` slightly in the future, so every TV shows the same countdown.
 - **One code path for every input.** The D-pad, the in-app Ask chips and Alexa all call the same functions in `backend/src/couchlink/core.py`.
 - **AI with mechanisms, not hope:**
   - Picks are validated against catalog IDs, and anything not in the catalog is dropped.
@@ -37,9 +37,15 @@ Keyboard: arrows = D-pad, Enter = OK, Backspace = Back.
 ## Run locally
 
 ```bash
-make test        # backend unit tests
+make test        # backend + sync-engine unit tests
 make server      # ws://localhost:8787/ws  (heuristic AI, no AWS needed)
 make web         # http://localhost:8082
+```
+
+Measure sync against the live backend (clock agreement and command fan-out between two clients):
+
+```bash
+cd backend && uv run python scripts/sync_bench.py --url wss://xskpgmfq98.execute-api.us-east-2.amazonaws.com/prod
 ```
 
 Simulate Alexa against the local server:

@@ -58,4 +58,20 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
   - Use in-Region Nova Lite v1.
 - **Suggestion:** Seed non-zero default Bedrock quotas for new projects (or explain why they're 0 in the console), and offer an in-Region, on-demand Nova 2 Lite.
 
+### 7. Tracking a support case from the CLI on the Free plan
+- **Task:** Check the status of the Bedrock quota support case (entry 6) from the terminal.
+- **Steps:** `aws support describe-cases --include-resolved-cases`
+- **Expected vs actual:** We expected to see the case we had opened. Instead: `SubscriptionRequiredException: Amazon Web Services Premium Support Subscription is required`. The case can be opened from the console but not read through the API.
+- **Severity:** Low.
+- **Workaround:** Check the case in the Support Center console.
+- **Suggestion:** Allow read-only `DescribeCases` for a project's own cases on every plan, or say in the error where to check instead.
+
+### 8. Web player silently stalls when the browser blocks autoplay
+- **Task:** Start the same movie on two screens, one of which joined from a link.
+- **Steps:** Open the web build from a `?code=` link without clicking anything, then start a movie from the other screen.
+- **Expected vs actual:** We expected both screens to play. The second screen stayed paused: Chrome rejects `play()` until the user interacts with the page, and the sample's `react-native-video` web player swallows the rejection, so nothing on screen explains it. Our sync loop then re-seeked the paused video every 2.5 s.
+- **Severity:** Medium (judges trying the web link would hit it).
+- **Workaround:** Retry `play()` while the session is playing and show "Press OK or click to join in" until it succeeds.
+- **Suggestion:** Handle autoplay rejection in the sample's web `VideoPlayer` (an `onPlaybackBlocked` callback or a built-in prompt).
+
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->
