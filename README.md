@@ -85,7 +85,7 @@ Then paste `WebSocketUrl` into `app/packages/shared-ui/src/session/config.ts` (`
 
 ## Fire TV builds
 
-- **Vega OS:** `app/apps/vega`. Install the Vega SDK, then run `yarn build:vega` and deploy to the Vega Virtual Device or a Fire TV Stick 4K Select.
+- **Vega OS:** `app/apps/vega`. Install the Vega SDK (tested with 0.24), then `make vvd` (start the Vega Virtual Device), `make vega` (build) and `make vega-run` (install and launch). `make vega` builds from a mirror without spaces in the path, because the Vega manifest builder breaks on paths like `Amazon Hackathon/`.
 - **Fire OS / Android TV:** `app/apps/expo-multi-tv`. Run `yarn dev:android`.
 
 ## Repo layout

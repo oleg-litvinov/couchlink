@@ -3,7 +3,7 @@ REGION ?= us-east-2
 PROFILE ?= couchlink
 export AWS_PROFILE := $(PROFILE)
 
-.PHONY: test server server-bedrock web catalog deploy deploy-web outputs
+.PHONY: test server server-bedrock web catalog deploy deploy-web outputs vega vvd vega-run
 
 test:            ## Backend + app sync unit tests
 	cd backend && uv run pytest -q
@@ -33,3 +33,12 @@ outputs:         ## Show stack outputs (WebSocketUrl, CdnUrl, AlexaFunctionArn..
 
 deploy-web:      ## Export the web build, upload it behind CloudFront, invalidate the cache
 	STACK=$(STACK) REGION=$(REGION) AWS_PROFILE=$(PROFILE) scripts/deploy_web.sh
+
+vega:            ## Build the Vega app (.vpkg) from a space-free mirror (see friction log #9)
+	scripts/build_vega.sh Release
+
+vvd:             ## Start the Vega Virtual Device
+	vega virtual-device start --timeout 240
+
+vega-run:        ## Install + launch the latest build on the virtual device (aarch64)
+	vega run-app app/apps/vega/build/aarch64-release/vega_aarch64.vpkg

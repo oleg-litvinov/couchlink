@@ -5,7 +5,7 @@ For each tool: what we used it for · what worked well · what needs work · onb
 | Tool / SDK | Used for | Worked well | Needs work | Onboarding | Again? |
 |---|---|---|---|---|---|
 | react-native-multi-tv-app-sample | App scaffold: player, spatial navigation, drawer | One codebase for web, Fire OS and Vega; spatial navigation works on web too | Node 25/corepack setup, stale Expo deps, 10-second sample clips; web player doesn't handle autoplay rejection | ~30 min | Yes: fastest way to a TV-grade UI |
-| Vega SDK / Vega Virtual Device | Vega OS build | TODO | TODO | TODO | TODO |
+| Vega SDK / Vega Virtual Device | Vega OS build | One installer sets up the CLI, VS Code extension and virtual device; `vega virtual-device start` booted in under a minute; `vega run-app` installs and launches in one step; `inputd-cli` makes D-pad input scriptable | Build breaks on paths with spaces; no working CLI screenshot; install docs (0.21) lag the SDK (0.24); virtual device docs URL 404 | About 1 hour from account to app running on the virtual device, including the path-with-space workaround | [[team]] |
 | react-tv-space-navigation | D-pad focus | Declarative focus and DefaultFocus | Wrapped rows need a grid primitive | Easy | Yes |
 | Alexa Skills Kit | Voice remote | TODO | TODO | TODO | TODO |
 | Amazon Bedrock (Converse, Nova Lite) | Joint picks, Q&A | Converse API makes the model a one-line env-var swap; Guardrails plug into the same call | New Free-plan project got a daily token quota of 0 (not adjustable), so the first call fails with ThrottlingException; Nova 2 Lite only via cross-Region inference profiles, which new-experience projects block | Blocked: no successful call yet (support case open) [[team: update when resolved]] | [[team]] |

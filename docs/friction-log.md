@@ -74,4 +74,23 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Workaround:** Retry `play()` while the session is playing and show "Press OK or click to join in" until it succeeds.
 - **Suggestion:** Handle autoplay rejection in the sample's web `VideoPlayer` (an `onPlaybackBlocked` callback or a built-in prompt).
 
+### 9. Vega build fails when the project path contains a space
+- **Task:** First `build:vega` of the multi-TV sample with Vega SDK 0.24.12112.
+- **Steps:** Check out the repo under `~/Documents/Business/Amazon Hackathon/`, run `yarn build:vega`.
+- **Expected vs actual:** We expected a `.vpkg`. Instead: `/bin/sh: /Users/.../Business/Amazon: No such file or directory` and `Unable to generate a manifest`. `@amazon-devices/kepler-compatibility-metro-config` (0.0.6) builds the manifest-builder command with `execSync` and string interpolation, so any path with a space breaks.
+- **Severity:** High (blocks the build; macOS folder names with spaces are common).
+- **Workaround:** `scripts/build_vega.sh` rsyncs `app/` to `~/.cache/couchlink-vega` and builds there. Workspace symlinks are relative, so the mirror works without reinstalling.
+- **Suggestion:** Quote the arguments or use `execFileSync`/`spawnSync` with an argument array; add a path-with-space case to the CLI's CI.
+
+### 10. Vega Virtual Device: screenshots and docs
+- **Task:** Capture the app running on the Vega Virtual Device from the command line, and find the virtual device docs.
+- **Steps:** `vda shell 'screenshooter /tmp/s.png'`, `vda shell 'gwsi-tool-screenshooter /tmp/g.png'`; open `developer.amazon.com/docs/vega/0.21/vega-virtual-device.html`.
+- **Expected vs actual:**
+  - `screenshooter` wrote a 0-byte file, then `vda shell` failed with `No running instances of com.amazon.dev.shell.service found` until the service recovered.
+  - `gwsi-tool-screenshooter` hung for over 60 s.
+  - The virtual device doc URL returned 404. The install page (0.21) also lags the SDK it installs (0.24), and `vega virtual-device` logs `vvman command not found` and reports SDK version `0.200.0`.
+- **Severity:** Medium (no scripted way to capture evidence for testing or demo videos).
+- **Workaround:** Screen-record the virtual device window on the host; verify app behavior through the backend and `loggingctl log -v <package>`.
+- **Suggestion:** A supported `vega device screenshot` command, and versioned docs that match the current SDK.
+
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->
