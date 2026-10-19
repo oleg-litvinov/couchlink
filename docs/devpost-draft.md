@@ -55,7 +55,7 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 
 ## Accomplishments
 - Median TV-to-TV drift of **35 ms** (p90 63 ms) between two web clients on the live site (11 ms median locally), down from a steady ~395 ms before we added speed nudging.
-- On the **Vega Virtual Device** against the live backend, the Vega TV stays **62–155 ms** behind the shared timeline (p90 ≤ 163 ms): ~155 ms after a synced start, ~140 ms after a seek, ~62 ms after pause/resume (`backend/scripts/drift_run.py`, 10 s windows). Vega's player can't change speed without re-buffering (friction log #11), so it keeps whatever offset it lands on; in one run that was ~960 ms.
+- On the **Vega Virtual Device** against the live backend, every steady phase lands **40–255 ms** from the shared timeline: after a synced start, a seek, a pause/resume, and starting a second title with the player already open (`backend/scripts/drift_run.py`, 10 s windows). Vega's player can't change speed without re-buffering (friction log #11), so anything past 300 ms gets a corrective **trim seek** (at most two per command): one seek that landed 481 ms behind was back to 40 ms within 7 s. Before the trim, a bad start could stay ~960 ms off indefinitely.
 - On the live AWS backend (us-east-2): two clients agree on the server clock to within **1–4 ms**, and a pause reaches the other TV in **~125 ms median** (p90 ~200 ms) over 210 commands (`backend/scripts/sync_bench.py`).
 - [[N]] seconds from app open to watching together.
 - [[N]] real test sessions, with [[quotes]].
@@ -87,7 +87,7 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 
 | Criterion | Evidence |
 |---|---|
-| Tech Implementation | Server-authoritative sync with clock offset (35 ms median TV-to-TV drift on the web, 62–155 ms on the Vega Virtual Device, 1–4 ms clock agreement); one core for TV, Alexa and web; the Vega W3C media player; Bedrock with validation and fallback |
+| Tech Implementation | Server-authoritative sync with clock offset (35 ms median TV-to-TV drift on the web, under 300 ms on the Vega Virtual Device, with trim seeks, 1–4 ms clock agreement); one core for TV, Alexa and web; the Vega W3C media player; Bedrock with validation and fallback |
 | Design | 10-foot UI, D-pad-first voting, "who did what" banners, synced countdown, under 60 s to start |
 | Potential Impact | Long-distance families and couples; no co-watching exists on Fire OS or Vega today; content-agnostic design (syncs state, never video) with a concrete path: an SDK for apps that own their content now, then a GroupWatch platform API with Prime Video first ([proposal](docs/groupwatch-api.md)) |
 | Quality of Idea | Alexa as a shared remote across two homes; joint recommendations from two people's moods; spoiler-safe Q&A |
@@ -103,7 +103,7 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 | 0:45–1:25 | Both tell Alexa their mood, picks appear, they vote, countdown | "Alexa finds something you'll both love." |
 | 1:25–2:00 | "Alexa, who is that?" pauses both TVs, answer card, resume | "Ask anything, without spoilers." |
 | 2:00–2:20 | Architecture diagram; highlight the thin arrow between TVs carrying only `{title, playing, position, time}` | "API Gateway WebSocket, Lambda, DynamoDB, Bedrock and Alexa. And notice what never crosses between homes: the video. Each TV streams from its own source, and we only sync the clock." |
-| 2:20–2:35 | Metrics: under 160 ms on Vega (35 ms on web), ~125 ms fan-out, under $0.01 per session | "Less than a fifth of a second apart on Fire TV, for under a cent per movie night." |
+| 2:20–2:35 | Metrics: under 300 ms on Vega (35 ms on web), ~125 ms fan-out, under $0.01 per session | "Under a third of a second apart on the Fire TV simulator, for under a cent per movie night." |
 | 2:35–2:50 | The GroupWatch proposal on screen: player contract → session service → "Alexa, pause for everyone" | "Today it plays our open-licensed films. Any Fire TV app can plug in with a few methods, and Prime Video could be first. Watch-together should be part of Fire TV itself." |
 
 Required: at least one shot of a real Fire TV or the Vega Virtual Device.

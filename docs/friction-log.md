@@ -102,13 +102,26 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Expected vs actual:**
   - We expected a small `playbackRate` change to apply smoothly, as it does in browsers. Instead it flushes the pipeline like a seek, so every nudge caused a stall and made drift worse.
   - Seeks stall for **0.4–4 s** on the virtual device, varying a lot from one seek to the next, and playback jumps 1–2 s on resume. With a 1 s re-seek threshold, the TV kept overshooting and seeking again.
-- **Measured (2026-10-18, VVD vs live backend, `backend/scripts/drift_run.py`):** with these workarounds the Vega TV holds a steady offset of ~155 ms behind after a synced start, ~140 ms after a seek and ~62 ms after pause/resume, versus 35 ms between two web players that can nudge speed. The offset never shrinks on its own; one run started a new title with the player already open and stayed ~960 ms behind for two minutes.
+- **Measured (2026-10-18, VVD vs live backend, `backend/scripts/drift_run.py`):** without speed control the Vega TV keeps whatever offset it lands on after a start or seek: ~62–155 ms in a good run, but one run stayed ~960 ms behind for two minutes. We added a **trim seek** (a corrective seek once playback is steady, only past 300 ms, at most two per command). With it, every steady phase lands 40–255 ms off, and a seek that landed 481 ms behind was back to 40 ms within 7 s, after one overshoot to 690 ms ahead. A web player reaches ~35 ms with speed nudging alone.
 - **Severity:** High for any watch-together or synced-playback app.
 - **Workaround:**
   - No speed nudging on Vega.
   - Re-seek only past 2.5 s of drift (a per-player `seekThreshold` in our adapter).
   - Wait for playback to move again after a seek before judging drift.
   - Aim each seek ahead by the measured stall, capped at 1.5 s so an overshoot can't trigger another seek.
+  - Trim offsets over 300 ms with at most two corrective seeks per command, once playback is steady.
 - **Suggestion:** Glitch-free `playbackRate` changes in the Vega W3C media player, documented seek latency, and a "seek completed / playing again" event. These would let Vega match web-level sync and are a prerequisite for the GroupWatch proposal ([groupwatch-api.md](groupwatch-api.md)).
+
+### 12. Vega Virtual Device: HTTPS media fails after hours of uptime
+- **Task:** Run repeated playback sessions on the Vega Virtual Device over several hours.
+- **Steps:** Leave the virtual device running for a few hours, then load a title from our CloudFront HTTPS URL.
+- **Expected vs actual:**
+  - We expected the same URL that had played all afternoon to keep playing. Instead the media player failed with `Error: Secure connection setup failed., domain: 2165, code: 5` on every title.
+  - `curl` from `vda shell` fetched the same URL fine, and the certificate was valid, so nothing pointed at the cause.
+  - The virtual device's clock had drifted **3 h 20 min** behind real time. That may be related, but the certificate was valid even at the device's wrong time, so we don't know the actual cause.
+  - After a media error, the app's player stays on the error. Reloading the same title doesn't retry, so the TV silently stops playing.
+- **Severity:** Medium. It cost about 30 minutes of debugging and looks exactly like an app or CDN bug.
+- **Workaround:** `vega virtual-device stop`, then `vega virtual-device start`. The clock was correct and playback worked again after the restart.
+- **Suggestion:** Keep the virtual device's clock synced to the host (or warn when it drifts), and include the underlying TLS reason, such as certificate time validity, in the media player's error.
 
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->

@@ -1,4 +1,4 @@
-import { decide, expectedPosition, FAST_NUDGE_RATE, NUDGE_RATE } from '../sync';
+import { canTrim, decide, expectedPosition, FAST_NUDGE_RATE, NUDGE_RATE, TRIM_MAX, TRIM_SETTLE_MS } from '../sync';
 import type { PlaybackState } from '../protocol';
 
 const base: PlaybackState = {
@@ -83,5 +83,44 @@ describe('decide', () => {
     expect(d.rate).toBeCloseTo(1 - FAST_NUDGE_RATE);
     expect(decide(base, at(10), 113, { ...idle, playingThreshold: 2.5 }).seekTo).not.toBeNull();
   });
+
+  it('trims a stuck offset with one seek on a player that cannot change speed', () => {
+    // Vega landed ~0.96 s behind after a start and would stay there: below its 2.5 s threshold.
+    const d = decide(base, at(10), 109.04, { ...idle, playingThreshold: 2.5, trim: true });
+    expect(d.seekTo).toBeCloseTo(110.3);
+    expect(d.trimmed).toBe(true);
+  });
+
+  it('leaves offsets under the trim threshold alone', () => {
+    // ~155 ms is what a clean Vega start lands on; a seek would risk overshooting by more.
+    const d = decide(base, at(10), 109.85, { ...idle, playingThreshold: 2.5, trim: true });
+    expect(d.seekTo).toBeNull();
+    expect(d.trimmed).toBe(false);
+  });
+
+  it('does not trim without permission, while settling or right after a seek', () => {
+    const vega = { playingThreshold: 2.5 };
+    expect(decide(base, at(10), 109, { ...idle, ...vega }).seekTo).toBeNull();
+    expect(decide(base, at(10), 109, { buffering: false, msSinceLastSeek: 500, ...vega, trim: true }).seekTo).toBeNull();
+    expect(
+      decide(base, at(13), 110.3, { buffering: false, msSinceLastSeek: 3000, settlingTarget: 110.3, ...vega, trim: true })
+        .seekTo,
+    ).toBeNull();
+  });
 });
 
+describe('canTrim', () => {
+  const steady = { hasRate: false, trimsUsed: 0, msStable: TRIM_SETTLE_MS + 1 };
+  it('allows a trim once a speed-less player has played steadily', () => {
+    expect(canTrim(steady)).toBe(true);
+  });
+  it('never trims players that can nudge speed instead', () => {
+    expect(canTrim({ ...steady, hasRate: true })).toBe(false);
+  });
+  it('waits for playback to be steady first', () => {
+    expect(canTrim({ ...steady, msStable: TRIM_SETTLE_MS - 1 })).toBe(false);
+  });
+  it('stops after the per-command budget so an overshoot cannot loop', () => {
+    expect(canTrim({ ...steady, trimsUsed: TRIM_MAX })).toBe(false);
+  });
+});

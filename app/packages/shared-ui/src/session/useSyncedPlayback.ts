@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from './SessionContext';
-import { decide, DEFAULT_SEEK_LEAD, MAX_SEEK_LEAD } from './sync';
+import { canTrim, decide, DEFAULT_SEEK_LEAD, expectedPosition, MAX_SEEK_LEAD, SEEK_COOLDOWN_MS } from './sync';
 
 interface PlayerAdapter {
   mediaId: string | undefined;
@@ -57,6 +57,10 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
   // Seek-while-playing bookkeeping: where we aimed, and how far ahead to aim next time.
   const settlingTarget = useRef<number | null>(null);
   const seekLead = useRef(DEFAULT_SEEK_LEAD);
+  // Trims of a stuck offset (players without speed control): budget per command, and since
+  // when playback has run steadily (playing, not buffering, not settling after a seek).
+  const trimsUsed = useRef(0);
+  const steadySince = useRef<number | null>(null);
   const ref = useRef({ s, adapter });
   ref.current = { s, adapter };
 
@@ -72,12 +76,26 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
       seekLead.current = Math.min(MAX_SEEK_LEAD, Math.max(DEFAULT_SEEK_LEAD, stall + 0.1));
       settlingTarget.current = null;
     }
+    const now = Date.now();
+    const steady =
+      st.playing &&
+      !a.isBuffering() &&
+      settlingTarget.current === null &&
+      sinceSeek > SEEK_COOLDOWN_MS &&
+      expectedPosition(st, sess.serverNow()) >= 0;
+    if (!steady) steadySince.current = null;
+    else if (steadySince.current === null) steadySince.current = now;
     const d = decide(st, sess.serverNow(), local, {
       buffering: a.isBuffering(),
       msSinceLastSeek: sinceSeek,
       settlingTarget: settlingTarget.current,
       lead: seekLead.current,
       playingThreshold: a.seekThreshold,
+      trim: canTrim({
+        hasRate: !!a.setRate,
+        trimsUsed: trimsUsed.current,
+        msStable: steadySince.current === null ? 0 : now - steadySince.current,
+      }),
     });
     setPaused(d.paused);
     setCountdown(d.countdown);
@@ -98,6 +116,11 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
       a.seekTo(d.seekTo);
       lastSeekAt.current = Date.now();
       settlingTarget.current = st.playing ? d.seekTo : null;
+      steadySince.current = null;
+      if (d.trimmed) {
+        trimsUsed.current += 1;
+        console.log(`[couchlink] trim seek drift ms=${Math.round(d.drift * 1000)} lead ms=${Math.round(seekLead.current * 1000)}`);
+      }
     }
   }, []);
 
@@ -106,6 +129,8 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
     if (!inSession) return;
     lastSeekAt.current = 0;
     settlingTarget.current = null;
+    trimsUsed.current = 0;
+    steadySince.current = null;
     tick();
   }, [inSession, s.state?.seq, tick]);
 

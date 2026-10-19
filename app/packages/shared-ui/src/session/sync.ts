@@ -18,6 +18,19 @@ export const NUDGE_DEADBAND = 0.08;
 export const NUDGE_RATE = 0.05;
 /** Gaps over a second close faster (still no re-buffering). */
 export const FAST_NUDGE_RATE = 0.1;
+/**
+ * Players that can't change speed (Vega) keep any offset below their seek threshold forever.
+ * Once playback is steady, an offset beyond TRIM_THRESHOLD gets a corrective seek, at most
+ * TRIM_MAX per command so an overshoot can't loop. Smaller offsets stay: a seek on Vega
+ * stalls 0.4-4 s, so it would risk landing further off than it started.
+ */
+export const TRIM_THRESHOLD = 0.3;
+export const TRIM_SETTLE_MS = 4000;
+export const TRIM_MAX = 2;
+
+export function canTrim(opts: { hasRate: boolean; trimsUsed: number; msStable: number }): boolean {
+  return !opts.hasRate && opts.trimsUsed < TRIM_MAX && opts.msStable >= TRIM_SETTLE_MS;
+}
 
 /** Where everyone should be right now. Negative = countdown before start. */
 export function expectedPosition(state: PlaybackState, serverNow: number): number {
@@ -31,6 +44,7 @@ export interface SyncDecision {
   countdown: number | null; // whole seconds left before a synchronized start
   drift: number; // local - expected (seconds)
   rate: number; // playback speed to apply (1 = normal)
+  trimmed: boolean; // seekTo is a trim of a small stuck offset (see canTrim)
 }
 
 export function decide(
@@ -46,6 +60,8 @@ export function decide(
     lead?: number;
     /** Drift (s) beyond which a playing TV seeks; players with slow seeks pass a larger value. */
     playingThreshold?: number;
+    /** A trim seek is allowed now (see canTrim). */
+    trim?: boolean;
   },
 ): SyncDecision {
   const expected = expectedPosition(state, serverNow);
@@ -56,6 +72,7 @@ export function decide(
       countdown: Math.ceil(-expected),
       drift: 0,
       rate: 1,
+      trimmed: false,
     };
   }
   const drift = localTime - expected;
@@ -67,7 +84,9 @@ export function decide(
     opts.msSinceLastSeek < SEEK_SETTLE_MAX_MS;
   const canSeek = !opts.buffering && !settling && opts.msSinceLastSeek > SEEK_COOLDOWN_MS;
   const lead = state.playing ? (opts.lead ?? DEFAULT_SEEK_LEAD) : 0;
-  const seekTo = canSeek && Math.abs(drift) > threshold ? expected + lead : null;
+  const reseek = canSeek && Math.abs(drift) > threshold;
+  const trimmed = !reseek && canSeek && state.playing && !!opts.trim && Math.abs(drift) > TRIM_THRESHOLD;
+  const seekTo = reseek || trimmed ? expected + lead : null;
   // Ahead: slow down a little; behind: speed up a little. Imperceptible, no re-buffering.
   const nudge =
     state.playing && !settling && seekTo === null && Math.abs(drift) > NUDGE_DEADBAND && Math.abs(drift) <= threshold;
@@ -77,6 +96,7 @@ export function decide(
     countdown: null,
     drift,
     rate: nudge ? 1 - Math.sign(drift) * (Math.abs(drift) > 1 ? FAST_NUDGE_RATE : NUDGE_RATE) : 1,
+    trimmed,
   };
 }
 
