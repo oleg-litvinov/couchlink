@@ -135,7 +135,7 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Workaround:**
   - Retry by reloading the source on the same player, and keep the player mounted under an error overlay.
   - Re-apply the shared play state once the surface is ready (the surface can arrive after the countdown ends).
-  - Planned: stop the CDN's `index.html` fallback from applying to `/media/*`.
+  - Removed the CDN's `index.html` fallback (2026-10-18). The web app doesn't need it, and a missing file now returns 403, so the player raises a normal error and the retry flow takes over.
 - **Suggestion:** Fail fast with an `error` event (with a message) when the content type isn't playable, never block the JS thread in `openMedia`, put the native reason (such as "insecure scheme") in `MediaError.message`, and document how to retry a failed load.
 
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->

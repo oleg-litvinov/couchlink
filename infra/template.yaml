@@ -181,8 +181,8 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
           ResponseHeadersPolicyId: 5cc3b908-e619-4b99-88e5-2cf7f45965bd # Managed-CORS-With-Preflight
-        CustomErrorResponses:
-          - { ErrorCode: 403, ResponseCode: 200, ResponsePagePath: /index.html }
+        # No index.html fallback for missing files: the web app lives at one URL (state in the query
+        # string), and a 200 HTML page served for a missing video freezes the Vega player (friction log #13).
 
   WebBucketPolicy:
     Type: AWS::S3::BucketPolicy
