@@ -119,9 +119,23 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
   - We expected the same URL that had played all afternoon to keep playing. Instead the media player failed with `Error: Secure connection setup failed., domain: 2165, code: 5` on every title.
   - `curl` from `vda shell` fetched the same URL fine, and the certificate was valid, so nothing pointed at the cause.
   - The virtual device's clock had drifted **3 h 20 min** behind real time. That may be related, but the certificate was valid even at the device's wrong time, so we don't know the actual cause.
-  - After a media error, the app's player stays on the error. Reloading the same title doesn't retry, so the TV silently stops playing.
+  - After a media error, our player stayed on the error screen: reloading the same title didn't retry, so the TV silently stopped playing. Fixed: it now retries in place after 2, 5 and 10 s, then offers **Try again**.
 - **Severity:** Medium. It cost about 30 minutes of debugging and looks exactly like an app or CDN bug.
 - **Workaround:** `vega virtual-device stop`, then `vega virtual-device start`. The clock was correct and playback worked again after the restart.
 - **Suggestion:** Keep the virtual device's clock synced to the host (or warn when it drifts), and include the underlying TLS reason, such as certificate time validity, in the media player's error.
+
+### 13. Vega media player: a non-video response freezes the app, and errors carry no message
+- **Task:** Recover from a failed media load (retry, then let the viewer choose).
+- **Steps:** Load a title whose URL returns HTML with status 200. Our CloudFront serves `index.html` for missing files, as single-page apps do. Separately, load an `http://` URL.
+- **Expected vs actual:**
+  - We expected an `error` event in both cases. With the HTML response, `openMedia` blocked the JS thread instead; after ~8 s `KeplerScriptThreadMonitor` reported "One of the threads was not responsive. Requesting application termination", and the app was killed with no error event.
+  - `http://` URLs are rejected (`isUriSchemeSecure Got an insecure protocol/scheme http`) but reach JS only as `code= 4 msg = `, with an empty message.
+  - Tearing down the player and its surface and creating a new one, to retry, stalled the second instance after the source was set, and the remounted surface's event arrived as `Unsupported top level event type topOnKeplerVideoSurfaceViewCreated`.
+- **Severity:** High. A missing media file crashes the app instead of showing an error.
+- **Workaround:**
+  - Retry by reloading the source on the same player, and keep the player mounted under an error overlay.
+  - Re-apply the shared play state once the surface is ready (the surface can arrive after the countdown ends).
+  - Planned: stop the CDN's `index.html` fallback from applying to `/media/*`.
+- **Suggestion:** Fail fast with an `error` event (with a message) when the content type isn't playable, never block the JS thread in `openMedia`, put the native reason (such as "insecure scheme") in `MediaError.message`, and document how to retry a failed load.
 
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->

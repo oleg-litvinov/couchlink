@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, BackHandler } from 'react-native';
-import { SpatialNavigationRoot } from 'react-tv-space-navigation';
+import { View, StyleSheet, BackHandler, Text } from 'react-native';
+import { DefaultFocus, SpatialNavigationRoot } from 'react-tv-space-navigation';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,6 +21,8 @@ import { useSyncedPlayback } from '../session/useSyncedPlayback';
 import { getTitle } from '../data/catalog';
 import Toasts from '../components/couch/Toasts';
 import { AnswerCard, AskPanel, Countdown, SyncBadge, Thinking } from '../components/couch/PlayerChrome';
+import { CouchButton, ui } from '../components/couch/ui';
+import { mediaRetryDelay } from '../session/mediaRetry';
 
 type PlayerScreenRouteProp = RouteProp<RootStackParamList, 'Player'>;
 type PlayerScreenNavigationProp = NativeStackNavigationProp<
@@ -63,6 +65,7 @@ export default function PlayerScreen() {
   const [isVideoInitialized, setIsVideoInitialized] = useState<boolean>(false);
   const [isVideoEnded, setIsVideoEnded] = useState<boolean>(false);
   const [isVideoError, setIsVideoError] = useState<boolean>(false);
+  const [loadFailures, setLoadFailures] = useState(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
 
@@ -75,7 +78,8 @@ export default function PlayerScreen() {
   const durationRef = useRef<number>(0);
   const videoHandlerRef = useRef<VideoHandler | null>(null);
   const bufferingRef = useRef(true);
-  const surfaceReadyRef = useRef(false);
+  // State, not a ref: the shared play state must be applied again once the surface is ready.
+  const [surfaceReady, setSurfaceReady] = useState(false);
 
   const sync = useSyncedPlayback({
     mediaId: route.params.mediaId,
@@ -99,7 +103,7 @@ export default function PlayerScreen() {
 
   // Apply the shared play/pause state (and hold during the synchronized countdown).
   useEffect(() => {
-    if (!sync.inSession || !surfaceReadyRef.current || !videoRef.current) return;
+    if (!sync.inSession || !surfaceReady || !videoRef.current) return;
     const shouldPause = sync.paused || sync.countdown !== null;
     try {
       if (shouldPause && !videoRef.current.paused) videoRef.current.pause();
@@ -108,7 +112,8 @@ export default function PlayerScreen() {
     } catch (e) {
       console.warn('[PlayerScreen.kepler] sync apply error:', e);
     }
-  }, [sync.inSession, sync.paused, sync.countdown]);
+    // A (re)loaded player or a late surface must pick up the shared state too.
+  }, [sync.inSession, sync.paused, sync.countdown, isVideoInitialized, surfaceReady]);
 
   // Update refs when state changes
   useEffect(() => {
@@ -248,6 +253,43 @@ export default function PlayerScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movie, headerImage, isFocused]);
 
+  // Reload the source on the same player, like a browser's video.load(). Tearing the player and
+  // its surface down and re-creating them stalled the second instance on Vega.
+  const retryLoad = useCallback(() => {
+    setIsVideoError(false);
+    setIsVideoInitialized(false);
+    setIsVideoBuffering(true);
+    videoHandlerRef.current?.loadVideoElements();
+  }, []);
+
+  // A failed load used to leave the TV on a blank error screen for good (friction log #12):
+  // retry with backoff, then let the viewer try again or exit.
+  useEffect(() => {
+    if (!isVideoError) return;
+    const delay = mediaRetryDelay(loadFailures + 1);
+    if (delay === null) return;
+    console.log(`[couchlink] media load failed; retry ${loadFailures + 1} in ${delay} ms`);
+    const t = setTimeout(() => {
+      setLoadFailures((f) => f + 1);
+      retryLoad();
+    }, delay);
+    return () => clearTimeout(t);
+  }, [isVideoError, loadFailures, retryLoad]);
+
+  useEffect(() => {
+    if (isVideoInitialized) setLoadFailures(0);
+  }, [isVideoInitialized]);
+
+  // Anyone starting the title again is a fresh chance: reset the budget and retry right away.
+  const loadSeq = session.state?.action === 'load' ? session.state.seq : null;
+  const videoErrorRef = useRef(false);
+  videoErrorRef.current = isVideoError;
+  useEffect(() => {
+    if (loadSeq === null) return;
+    setLoadFailures(0);
+    if (videoErrorRef.current) retryLoad();
+  }, [loadSeq, retryLoad]);
+
   /**
    * Handle video end - pause, show controls, and navigate back
    */
@@ -336,7 +378,7 @@ export default function PlayerScreen() {
     // Set surface handle on video player
     if (videoRef.current) {
       videoRef.current.setSurfaceHandle(surfaceHandle);
-      surfaceReadyRef.current = true;
+      setSurfaceReady(true);
       // In a session the sync effect decides play/pause; solo playback starts now.
       if (!sync.inSession) {
         videoRef.current.play();
@@ -357,6 +399,7 @@ export default function PlayerScreen() {
       videoRef.current.clearSurfaceHandle(surfaceHandle);
     }
     surfaceHandleRef.current = null;
+    setSurfaceReady(false);
   }, []);
 
   /**
@@ -387,18 +430,6 @@ export default function PlayerScreen() {
 
   const styles = usePlayerStyles();
 
-  if (isVideoError) {
-    return (
-      <SpatialNavigationRoot isActive={isFocused}>
-        <View style={styles.container}>
-          <View style={styles.errorContainer}>
-            <ExitButton onSelect={navigateBack} />
-          </View>
-        </View>
-      </SpatialNavigationRoot>
-    );
-  }
-
   return (
     <SpatialNavigationRoot isActive={isFocused}>
       <View style={styles.container}>
@@ -418,7 +449,7 @@ export default function PlayerScreen() {
         {sync.countdown !== null && <Countdown seconds={sync.countdown} title={title?.title} />}
 
         {/* Custom controls overlay with buffering indicator */}
-        {!overlayOpen && !!durationRef.current && (
+        {!overlayOpen && !isVideoError && !!durationRef.current && (
           <VideoOverlay
             visible={controlsVisible || paused}
             paused={paused}
@@ -452,6 +483,30 @@ export default function PlayerScreen() {
             }}
             onDismiss={session.dismissCard}
           />
+        )}
+        {/* Overlay rather than replace the player: it must stay mounted to retry the load. */}
+        {isVideoError && (
+          <View style={styles.errorContainer}>
+            <ExitButton onSelect={navigateBack} />
+            <Text style={ui.h2}>Couldn't load the video</Text>
+            {mediaRetryDelay(loadFailures + 1) !== null ? (
+              <Text style={ui.body}>Trying again...</Text>
+            ) : (
+              <>
+                <Text style={ui.body}>Check the connection, then try again.</Text>
+                <DefaultFocus>
+                  <CouchButton
+                    label="Try again"
+                    variant="primary"
+                    onSelect={() => {
+                      setLoadFailures(0);
+                      retryLoad();
+                    }}
+                  />
+                </DefaultFocus>
+              </>
+            )}
+          </View>
         )}
         <Toasts />
       </View>
