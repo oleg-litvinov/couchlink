@@ -48,6 +48,12 @@ Measure sync against the live backend (clock agreement and command fan-out betwe
 cd backend && uv run python scripts/sync_bench.py --url wss://xskpgmfq98.execute-api.us-east-2.amazonaws.com/prod
 ```
 
+Measure a TV's playback drift: start a party on the TV, then drive start, seek and pause/resume from a second client. The TV logs `[couchlink] drift ms median=… p90=… signed=…` every 10 s while playing (on Vega: `vda shell 'loggingctl log -f -v com.giolaq.multitv.vega' | grep couchlink`):
+
+```bash
+cd backend && uv run python scripts/drift_run.py <code> --url wss://xskpgmfq98.execute-api.us-east-2.amazonaws.com/prod
+```
+
 Simulate Alexa against the local server:
 
 ```bash
