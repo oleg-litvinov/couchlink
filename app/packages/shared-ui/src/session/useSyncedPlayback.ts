@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from './SessionContext';
-import { decide } from './sync';
+import { decide, DEFAULT_SEEK_LEAD, MAX_SEEK_LEAD } from './sync';
 
 interface PlayerAdapter {
   mediaId: string | undefined;
@@ -10,6 +10,8 @@ interface PlayerAdapter {
   isBuffering: () => boolean;
   /** Optional: players that support it close small gaps by changing speed. */
   setRate?: (rate: number) => void;
+  /** Optional: drift (s) before re-seeking while playing; raise it for players whose seeks stall. */
+  seekThreshold?: number;
 }
 
 const driftLog: number[] = [];
@@ -36,6 +38,9 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [drift, setDrift] = useState<number | null>(null);
   const lastSeekAt = useRef(0);
+  // Seek-while-playing bookkeeping: where we aimed, and how far ahead to aim next time.
+  const settlingTarget = useRef<number | null>(null);
+  const seekLead = useRef(DEFAULT_SEEK_LEAD);
   const ref = useRef({ s, adapter });
   ref.current = { s, adapter };
 
@@ -43,14 +48,25 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
     const { s: sess, adapter: a } = ref.current;
     const st = sess.state;
     if (!st || st.mediaId !== a.mediaId) return;
-    const d = decide(st, sess.serverNow(), a.getTime(), {
+    const local = a.getTime();
+    const sinceSeek = Date.now() - lastSeekAt.current;
+    if (settlingTarget.current !== null && local >= settlingTarget.current + 0.1) {
+      // Playback moved again: the stall is the time since the seek minus what has played since.
+      const stall = sinceSeek / 1000 - (local - settlingTarget.current);
+      seekLead.current = Math.min(MAX_SEEK_LEAD, Math.max(DEFAULT_SEEK_LEAD, stall + 0.1));
+      settlingTarget.current = null;
+    }
+    const d = decide(st, sess.serverNow(), local, {
       buffering: a.isBuffering(),
-      msSinceLastSeek: Date.now() - lastSeekAt.current,
+      msSinceLastSeek: sinceSeek,
+      settlingTarget: settlingTarget.current,
+      lead: seekLead.current,
+      playingThreshold: a.seekThreshold,
     });
     setPaused(d.paused);
     setCountdown(d.countdown);
     if (d.countdown === null && st.playing && !a.isBuffering()) {
-      setDrift(d.drift);
+      setDrift((prev) => (prev !== null && Math.abs(prev - d.drift) < 0.05 ? prev : d.drift));
       driftLog.push(Math.abs(d.drift) * 1000);
       if (driftLog.length > 600) driftLog.shift();
     } else if (!st.playing) {
@@ -60,6 +76,7 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
     if (d.seekTo !== null) {
       a.seekTo(d.seekTo);
       lastSeekAt.current = Date.now();
+      settlingTarget.current = st.playing ? d.seekTo : null;
     }
   }, []);
 
@@ -67,6 +84,7 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
   useEffect(() => {
     if (!inSession) return;
     lastSeekAt.current = 0;
+    settlingTarget.current = null;
     tick();
   }, [inSession, s.state?.seq, tick]);
 

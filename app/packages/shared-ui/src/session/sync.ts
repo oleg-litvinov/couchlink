@@ -6,9 +6,18 @@ export const PLAYING_DRIFT_THRESHOLD = 1.0;
 export const PAUSED_DRIFT_THRESHOLD = 0.3;
 /** After a seek, give the player time to buffer before judging drift again. */
 export const SEEK_COOLDOWN_MS = 2500;
+/** Some players (Vega) stall for seconds after a seek; don't judge drift until playback moves again. */
+export const SEEK_SETTLE_MAX_MS = 8000;
+/** Default seek lead while playing, before we've measured how long this player stalls. */
+export const DEFAULT_SEEK_LEAD = 0.3;
+// Seek stalls vary a lot from one seek to the next (0.4-4 s on the Vega Virtual Device), so cap
+// the lead below the Vega seek threshold: an overshoot must not trigger another seek.
+export const MAX_SEEK_LEAD = 1.5;
 /** Below the seek threshold, nudge playback speed to close small gaps smoothly. */
 export const NUDGE_DEADBAND = 0.08;
 export const NUDGE_RATE = 0.05;
+/** Gaps over a second close faster (still no re-buffering). */
+export const FAST_NUDGE_RATE = 0.1;
 
 /** Where everyone should be right now. Negative = countdown before start. */
 export function expectedPosition(state: PlaybackState, serverNow: number): number {
@@ -28,7 +37,16 @@ export function decide(
   state: PlaybackState,
   serverNow: number,
   localTime: number,
-  opts: { buffering: boolean; msSinceLastSeek: number },
+  opts: {
+    buffering: boolean;
+    msSinceLastSeek: number;
+    /** Where the last seek (while playing) aimed; null once playback has moved past it. */
+    settlingTarget?: number | null;
+    /** Seconds to aim ahead when seeking while playing (measured seek stall). */
+    lead?: number;
+    /** Drift (s) beyond which a playing TV seeks; players with slow seeks pass a larger value. */
+    playingThreshold?: number;
+  },
 ): SyncDecision {
   const expected = expectedPosition(state, serverNow);
   if (expected < 0) {
@@ -41,17 +59,24 @@ export function decide(
     };
   }
   const drift = localTime - expected;
-  const threshold = state.playing ? PLAYING_DRIFT_THRESHOLD : PAUSED_DRIFT_THRESHOLD;
-  const canSeek = !opts.buffering && opts.msSinceLastSeek > SEEK_COOLDOWN_MS;
-  const seekTo = canSeek && Math.abs(drift) > threshold ? expected + (state.playing ? 0.3 : 0) : null;
+  const threshold = state.playing ? (opts.playingThreshold ?? PLAYING_DRIFT_THRESHOLD) : PAUSED_DRIFT_THRESHOLD;
+  const settling =
+    state.playing &&
+    opts.settlingTarget != null &&
+    localTime < opts.settlingTarget + 0.1 &&
+    opts.msSinceLastSeek < SEEK_SETTLE_MAX_MS;
+  const canSeek = !opts.buffering && !settling && opts.msSinceLastSeek > SEEK_COOLDOWN_MS;
+  const lead = state.playing ? (opts.lead ?? DEFAULT_SEEK_LEAD) : 0;
+  const seekTo = canSeek && Math.abs(drift) > threshold ? expected + lead : null;
   // Ahead: slow down a little; behind: speed up a little. Imperceptible, no re-buffering.
-  const nudge = state.playing && seekTo === null && Math.abs(drift) > NUDGE_DEADBAND && Math.abs(drift) <= threshold;
+  const nudge =
+    state.playing && !settling && seekTo === null && Math.abs(drift) > NUDGE_DEADBAND && Math.abs(drift) <= threshold;
   return {
     paused: !state.playing,
     seekTo,
     countdown: null,
     drift,
-    rate: nudge ? 1 - Math.sign(drift) * NUDGE_RATE : 1,
+    rate: nudge ? 1 - Math.sign(drift) * (Math.abs(drift) > 1 ? FAST_NUDGE_RATE : NUDGE_RATE) : 1,
   };
 }
 

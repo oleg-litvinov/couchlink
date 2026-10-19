@@ -86,6 +86,10 @@ export default function PlayerScreen() {
       setCurrentTime(t);
     },
     isBuffering: () => bufferingRef.current,
+    // Vega's player jumps 1-2 s on resume and stalls for seconds after every seek, and a
+    // playbackRate change flushes the pipeline like a seek (friction log #11). So: no speed
+    // nudging here, and only re-seek when drift exceeds 2.5 s.
+    seekThreshold: 2.5,
   });
   const overlayOpen = askOpen || !!session.card || session.thinking?.what === 'ask';
 
@@ -271,27 +275,33 @@ export default function PlayerScreen() {
   /**
    * Handle remote control key presses
    */
+  // Handlers change on every render; read them through a ref so the key listener is
+  // registered once per overlay state instead of being torn down and re-added constantly.
+  const keyHandlers = useRef({ seek, togglePausePlay, showControls, navigateBack });
+  keyHandlers.current = { seek, togglePausePlay, showControls, navigateBack };
+
   useEffect(() => {
     if (overlayOpen) return; // focus belongs to the Ask panel / answer card
     const handleKeyDown = (key: SupportedKeys) => {
+      const h = keyHandlers.current;
       try {
         switch (key) {
           case SupportedKeys.Right:
           case SupportedKeys.FastForward:
-            seek(currentTimeRef.current + 10);
+            h.seek(currentTimeRef.current + 10);
             break;
           case SupportedKeys.Left:
           case SupportedKeys.Rewind:
-            seek(currentTimeRef.current - 10);
+            h.seek(currentTimeRef.current - 10);
             break;
           case SupportedKeys.Back:
-            navigateBack();
+            h.navigateBack();
             break;
           case SupportedKeys.PlayPause:
-            togglePausePlay();
+            h.togglePausePlay();
             break;
           default:
-            showControls();
+            h.showControls();
             break;
         }
       } catch (e) {
@@ -305,7 +315,7 @@ export default function PlayerScreen() {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        navigateBack();
+        keyHandlers.current.navigateBack();
         return true;
       },
     );
@@ -314,7 +324,7 @@ export default function PlayerScreen() {
       RemoteControlManager.removeKeydownListener(listener);
       backHandler.remove();
     };
-  }, [seek, togglePausePlay, showControls, navigateBack, overlayOpen]);
+  }, [overlayOpen]);
 
   /**
    * Handle surface view creation
