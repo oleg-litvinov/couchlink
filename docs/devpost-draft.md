@@ -74,10 +74,13 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 - [[team: one lesson from Vega / Alexa / user testing]]
 
 ## What's next
-- Emoji reactions.
-- "Catch me up" for late joiners.
-- An MCP server for Alexa+.
-- A proposal for a Vega **GroupWatch** platform API so any streaming app can offer watch-together.
+**The honest limit:** today CouchLink only plays our own Creative Commons films. A Fire TV app can't see or control Prime Video's or Netflix's player, and no OS-level co-watching API exists. So CouchLink can't sync those services on its own, and we didn't try to hack around it.
+
+**What makes that a solvable problem:** CouchLink syncs *state, never video*. Each home streams from its own subscription, and only `{title, playing, position, time}` travels between TVs. Any player that can report its time and seek can plug in. Ours already runs two very different players, web and Vega, through the same small adapter.
+
+1. **Now: an SDK for Fire TV apps that own their content.** Free ad-supported channels, indie film, kids, fitness and education apps can add watch-together without waiting for anyone.
+2. **Next: a Vega GroupWatch platform API, with Prime Video first.** Amazon runs the session service, apps implement a small player contract (time, seek, play, pause, buffering), and Alexa gets "pause for everyone." Full proposal: [`docs/groupwatch-api.md`](docs/groupwatch-api.md).
+3. **Product:** "Catch me up" for late joiners, emoji reactions, and an MCP server for Alexa+.
 
 ## How we meet the judging criteria
 
@@ -85,7 +88,7 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 |---|---|
 | Tech Implementation | Server-authoritative sync with clock offset (35 ms median TV-to-TV drift on the live site, 1–4 ms clock agreement); one core for TV, Alexa and web; the Vega W3C media player; Bedrock with validation and fallback |
 | Design | 10-foot UI, D-pad-first voting, "who did what" banners, synced countdown, under 60 s to start |
-| Potential Impact | Long-distance families and couples; no co-watching exists on Fire OS or Vega today; a path to an Appstore SDK or platform API |
+| Potential Impact | Long-distance families and couples; no co-watching exists on Fire OS or Vega today; content-agnostic design (syncs state, never video) with a concrete path: an SDK for apps that own their content now, then a GroupWatch platform API with Prime Video first ([proposal](docs/groupwatch-api.md)) |
 | Quality of Idea | Alexa as a shared remote across two homes; joint recommendations from two people's moods; spoiler-safe Q&A |
 
 ---
@@ -98,7 +101,10 @@ Families who live apart still "watch together" by texting "3, 2, 1, play" and th
 | 0:15–0:45 | TV A starts a party, TV B joins by code | "With CouchLink, one code and you're on the same couch." |
 | 0:45–1:25 | Both tell Alexa their mood, picks appear, they vote, countdown | "Alexa finds something you'll both love." |
 | 1:25–2:00 | "Alexa, who is that?" pauses both TVs, answer card, resume | "Ask anything, without spoilers." |
-| 2:00–2:25 | Architecture diagram | "API Gateway WebSocket, Lambda, DynamoDB, Bedrock, Alexa." |
-| 2:25–2:50 | Metrics and quotes, closing ask | "Watch-together should be part of Fire TV itself." |
+| 2:00–2:20 | Architecture diagram; highlight the thin arrow between TVs carrying only `{title, playing, position, time}` | "API Gateway WebSocket, Lambda, DynamoDB, Bedrock and Alexa. And notice what never crosses between homes: the video. Each TV streams from its own source, and we only sync the clock." |
+| 2:20–2:35 | Metrics: 35 ms drift, ~125 ms fan-out, under $0.01 per session | "35 milliseconds apart, for under a cent per movie night." |
+| 2:35–2:50 | The GroupWatch proposal on screen: player contract → session service → "Alexa, pause for everyone" | "Today it plays our open-licensed films. Any Fire TV app can plug in with a few methods, and Prime Video could be first. Watch-together should be part of Fire TV itself." |
 
 Required: at least one shot of a real Fire TV or the Vega Virtual Device.
+
+Rule check: no third-party trademarks or copyrighted footage. Use only our Creative Commons titles on screen, and *say* "Prime Video" in the voice-over rather than showing its logo or UI.

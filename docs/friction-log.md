@@ -37,7 +37,8 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Expected vs actual:** There is no OS-level co-watching API (Apple has SharePlay), so every app would need its own sync service.
 - **Severity:** High (product gap).
 - **Workaround:** Our own WebSocket service with clock-offset estimation.
-- **Suggestion:** A Vega "GroupWatch" API that handles sessions, a clock-synced media controller and an Alexa intent such as "Alexa, pause for everyone".
+- **Also:** a third-party app can't see or control another app's player, so even with both homes on Prime Video, CouchLink can't sync Prime Video's playback. The only routes (developer-mode media-session access on Fire OS, injected key presses) can't ship in the Appstore and don't exist on Vega.
+- **Suggestion:** A Vega "GroupWatch" API that handles sessions, a clock-synced media controller and an Alexa intent such as "Alexa, pause for everyone". Full proposal: [groupwatch-api.md](groupwatch-api.md).
 
 ### 5. Alexa to Fire TV app control path
 - **Task:** Let a voice command pause a third-party Vega app.
@@ -51,6 +52,8 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Steps:** `aws login`, then `bedrock-runtime converse` with a 5-token prompt.
 - **Expected vs actual:** We expected a reply. Instead we got `ThrottlingException: Too many tokens per day` on the very first call. Service Quotas shows the applied value as **0** for every model's "tokens per day", marked not adjustable.
 - **Additional friction:** Nova 2 Lite is offered only through cross-Region inference profiles, and new-experience projects block cross-Region features.
+- **Re-checked 2026-10-18, six days later:** still blocked. `amazon.nova-lite-v1:0`, `us.amazon.nova-lite-v1:0` and `us.amazon.nova-2-lite-v1:0` all return the same `ThrottlingException`. Service Quotas shows **every** "tokens per day" quota in the project at 0, not adjustable, across every model provider (Nova, Claude, Llama, Mistral, Cohere and others). Meanwhile the [supported services page](https://docs.aws.amazon.com/accounts/latest/reference/supported-services-sign-up-new.html) lists Amazon Bedrock as included in the Free Tier, so the docs and the account disagree, and nothing in the console or the error says what would unlock it.
+- **Upgrading to the Paid plan (2026-10-18) didn't help.** After the upgrade, `get-account-plan-state` reports `PAID` and every call still throttles. For Nova Lite (`L-45E0AD92`), the AWS default is 5,760,000,000 tokens per day, but the value applied at account level is 0, marked not adjustable. So the block is an account-level override that the customer can't see the reason for, can't change, and that the plan upgrade doesn't reset.
 - **Severity:** High (blocks the AI half of the AWS Builder story).
 - **Workaround:**
   - Deterministic offline fallback, with a circuit breaker that skips Bedrock for 10 minutes after a daily-quota error.
@@ -92,5 +95,19 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Severity:** Medium (no scripted way to capture evidence for testing or demo videos).
 - **Workaround:** Screen-record the virtual device window on the host; verify app behavior through the backend and `loggingctl log -v <package>`.
 - **Suggestion:** A supported `vega device screenshot` command, and versioned docs that match the current SDK.
+
+### 11. Vega media player: speed changes flush playback, and seeks stall
+- **Task:** Keep a Vega TV within tens of milliseconds of a web TV, using the same drift correction that works on the web: nudge playback speed ±5% for small gaps, and re-seek only past 1 s.
+- **Steps:** Run a session between the web build and the W3C media player on the Vega Virtual Device. Log the requested seek target, the player's position before and after the seek, and buffering state.
+- **Expected vs actual:**
+  - We expected a small `playbackRate` change to apply smoothly, as it does in browsers. Instead it flushes the pipeline like a seek, so every nudge caused a stall and made drift worse.
+  - Seeks stall for **0.4–4 s** on the virtual device, varying a lot from one seek to the next, and playback jumps 1–2 s on resume. With a 1 s re-seek threshold, the TV kept overshooting and seeking again.
+- **Severity:** High for any watch-together or synced-playback app.
+- **Workaround:**
+  - No speed nudging on Vega.
+  - Re-seek only past 2.5 s of drift (a per-player `seekThreshold` in our adapter).
+  - Wait for playback to move again after a seek before judging drift.
+  - Aim each seek ahead by the measured stall, capped at 1.5 s so an overshoot can't trigger another seek.
+- **Suggestion:** Glitch-free `playbackRate` changes in the Vega W3C media player, documented seek latency, and a "seek completed / playing again" event. These would let Vega match web-level sync and are a prerequisite for the GroupWatch proposal ([groupwatch-api.md](groupwatch-api.md)). [[team: re-measure Vega drift on the VVD and add the number here.]]
 
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->

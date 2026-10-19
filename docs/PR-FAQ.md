@@ -33,6 +33,7 @@ SEATTLE, October 2026. Today we announced CouchLink, a watch-together experience
    - Picks always come from the real catalog, and you vote before anything plays.
    - Answers are labeled as AI. They're limited to what has already happened on screen, and say "not sure yet" when the context doesn't contain the answer.
 5. **How is this different from Teleparty or Prime Video Watch Party?** Those depend on a browser or phone. CouchLink lives on the TV itself, uses the remote and Alexa, and adds joint discovery and Q&A.
+6. **Can I watch Prime Video or Netflix with it?** Not yet. A Fire TV app can't control another app's player, so today CouchLink plays its own catalog of openly licensed films. It was built so that's easy to change: it never sends video between homes, only the shared play/pause/position. Each home would stream from its own subscription. Any streaming app can plug in, and our [GroupWatch proposal](groupwatch-api.md) shows how Fire TV could make that available to every app.
 
 ## Internal (stakeholder / judge) FAQ
 
@@ -56,9 +57,9 @@ SEATTLE, October 2026. Today we announced CouchLink, a watch-together experience
 4. **What does it cost to run?** Well under $0.01 of compute and AI per 2-hour session (Lambda, DynamoDB and API Gateway on demand, plus about 4 Nova Lite calls). Video delivery is the only material cost, and a streaming partner already pays for it.
 5. **Biggest risks?**
    - Sync drift. Mitigated by server time plus drift correction, and we measure it.
-   - Content licensing. Mitigated by pitching CouchLink as an SDK or platform API.
+   - Content. On its own, CouchLink can only play titles it has rights to, which today means Creative Commons films. Mitigated by design: CouchLink syncs state, never video, so each viewer streams from their own subscription and no licensing deal is needed for the sync layer. The path is an SDK for apps that own their content, then a GroupWatch platform API ([proposal](groupwatch-api.md)).
    - Voice routing from Alexa to a TV app. Mitigated by routing through our backend, with an on-screen fallback.
-6. **What did we deliberately leave out?** Accounts and login, more than 2–3 viewers, a phone remote, and control of third-party apps like Netflix (technically impossible today).
+6. **What did we deliberately leave out?** Accounts and login, more than 2–3 viewers, a phone remote, and control of third-party apps like Prime Video or Netflix. Fire TV doesn't let one app control another's player, and the workarounds (developer-mode media-session access, faking key presses, screen capture) are fragile, can't be distributed in the Appstore, or break DRM and terms of use. That gap is what GroupWatch proposes to close.
 7. **How will we measure success?**
 
    | Metric | Target |
@@ -73,7 +74,6 @@ SEATTLE, October 2026. Today we announced CouchLink, a watch-together experience
    - A human chooses before anything plays.
    - No spoilers, ever: enforced in code, not prompts.
 9. **What's next?**
-   - Emoji reactions.
-   - "Catch me up" for late joiners.
-   - An MCP server for Alexa+.
-   - Offering watch-together as a Fire TV platform API for any streaming app.
+   1. **Now:** offer CouchLink as an SDK to Fire TV apps that own their content and player (free ad-supported channels, indie film, kids, fitness, education). They need nothing from Amazon.
+   2. **Next:** a Vega GroupWatch platform API, with Prime Video as the first app. Amazon runs the session service, apps implement a small player contract, and Alexa gets "pause for everyone." See [groupwatch-api.md](groupwatch-api.md).
+   3. **Product:** "Catch me up" for late joiners, emoji reactions, and an MCP server for Alexa+.
