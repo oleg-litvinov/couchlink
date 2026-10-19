@@ -15,6 +15,22 @@ interface PlayerAdapter {
 }
 
 const driftLog: number[] = [];
+/** How often a TV logs its drift summary (read with `loggingctl` on Vega, the console on web). */
+const DRIFT_REPORT_MS = 10000;
+let lastDriftReport = 0;
+/** Signed drift samples (ms) since the last report: + means this TV is ahead. */
+let reportWindow: number[] = [];
+
+function reportDrift() {
+  if (!reportWindow.length) return;
+  const abs = reportWindow.map(Math.abs).sort((a, b) => a - b);
+  const signed = [...reportWindow].sort((a, b) => a - b);
+  const pick = (xs: number[], q: number) => Math.round(xs[Math.floor(xs.length * q)]);
+  console.log(
+    `[couchlink] drift ms median=${pick(abs, 0.5)} p90=${pick(abs, 0.9)} signed=${pick(signed, 0.5)} n=${abs.length}`,
+  );
+  reportWindow = [];
+}
 
 /** Recent absolute drift samples (ms) for the demo/metrics: median, p90. */
 export function driftStats(): { median: number; p90: number; n: number } | null {
@@ -69,6 +85,11 @@ export function useSyncedPlayback(adapter: PlayerAdapter) {
       setDrift((prev) => (prev !== null && Math.abs(prev - d.drift) < 0.05 ? prev : d.drift));
       driftLog.push(Math.abs(d.drift) * 1000);
       if (driftLog.length > 600) driftLog.shift();
+      reportWindow.push(d.drift * 1000);
+      if (Date.now() - lastDriftReport > DRIFT_REPORT_MS) {
+        lastDriftReport = Date.now();
+        reportDrift();
+      }
     } else if (!st.playing) {
       setDrift(null);
     }

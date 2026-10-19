@@ -94,7 +94,7 @@ Apps receive a `GroupSession` object with events: member joined or left, state c
 
 From our measurements, sync quality depends far more on the player than on the network: the network adds a few ms, while players add seconds.
 
-- **Glitch-free speed change.** Nudging speed ±5% took two web players from ~395 ms apart to 35 ms. On the Vega Virtual Device a speed change flushes the pipeline, so the Vega build falls back to re-seeking, which needs a 2.5 s threshold. The single biggest improvement Vega could make for GroupWatch is a speed change that doesn't re-buffer.
+- **Glitch-free speed change.** Nudging speed ±5% took two web players from ~395 ms apart to 35 ms. On the Vega Virtual Device a speed change flushes the pipeline, so the Vega build falls back to re-seeking, which needs a 2.5 s threshold. The result: Vega keeps whatever offset it lands on, 62–155 ms in a clean run and ~960 ms in a bad one, where a web player converges to ~35 ms. The single biggest improvement Vega could make for GroupWatch is a speed change that doesn't re-buffer.
 - **Accurate, frequent `currentTime`.**
 - **Fast, predictable seeks.** CouchLink measured stalls of 0.4–4 s after a seek on the Vega Virtual Device.
 

@@ -102,12 +102,13 @@ Format: **Task** · Steps · Expected vs actual · Severity (Critical / High / M
 - **Expected vs actual:**
   - We expected a small `playbackRate` change to apply smoothly, as it does in browsers. Instead it flushes the pipeline like a seek, so every nudge caused a stall and made drift worse.
   - Seeks stall for **0.4–4 s** on the virtual device, varying a lot from one seek to the next, and playback jumps 1–2 s on resume. With a 1 s re-seek threshold, the TV kept overshooting and seeking again.
+- **Measured (2026-10-18, VVD vs live backend, `backend/scripts/drift_run.py`):** with these workarounds the Vega TV holds a steady offset of ~155 ms behind after a synced start, ~140 ms after a seek and ~62 ms after pause/resume, versus 35 ms between two web players that can nudge speed. The offset never shrinks on its own; one run started a new title with the player already open and stayed ~960 ms behind for two minutes.
 - **Severity:** High for any watch-together or synced-playback app.
 - **Workaround:**
   - No speed nudging on Vega.
   - Re-seek only past 2.5 s of drift (a per-player `seekThreshold` in our adapter).
   - Wait for playback to move again after a seek before judging drift.
   - Aim each seek ahead by the measured stall, capped at 1.5 s so an overshoot can't trigger another seek.
-- **Suggestion:** Glitch-free `playbackRate` changes in the Vega W3C media player, documented seek latency, and a "seek completed / playing again" event. These would let Vega match web-level sync and are a prerequisite for the GroupWatch proposal ([groupwatch-api.md](groupwatch-api.md)). [[team: re-measure Vega drift on the VVD and add the number here.]]
+- **Suggestion:** Glitch-free `playbackRate` changes in the Vega W3C media player, documented seek latency, and a "seek completed / playing again" event. These would let Vega match web-level sync and are a prerequisite for the GroupWatch proposal ([groupwatch-api.md](groupwatch-api.md)).
 
 <!-- TODO(team): add entries for Vega SDK install, Vega Virtual Device, two-instance testing, Alexa console, Bedrock model access -->
